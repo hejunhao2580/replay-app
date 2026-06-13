@@ -1,5 +1,7 @@
 # Replay Intel GPU 中文适配版
 
+项目版本：`1.0.0.0`
+
 这是基于 Replay 的 Intel 显卡适配版本，保留原版的主要功能和界面结构，重点把本地推理从 NVIDIA/CUDA 路线改为 Intel GPU/XPU 路线，并补充中文界面与中英文语言切换。
 
 ## 主要变化
@@ -10,7 +12,7 @@
 - 修复新版 PyTorch 与 fairseq/hydra 的兼容问题，避免 `name 'help' is not defined` 和 `weights_only` 加载失败。
 - 修复 Faiss 索引数组判断问题，避免生成中途出现 `truth value of an array` 报错。
 - 软件界面支持中文和英文切换，默认英文；中文模式下尽量使用通俗中文，不保留混杂英文。
-- 增加 Windows Intel GPU 构建脚本和上游同步脚本，方便后续更新后重新编译。
+- 增加 Windows Intel GPU 构建脚本、发布脚本和一键安装脚本，方便后续更新、重新编译和分发。
 
 ## 已验证环境
 
@@ -20,18 +22,18 @@
 - ONNX 执行器：`OpenVINOExecutionProvider`
 - 验证结果：使用本地音频和 `alan` RVC 模型生成成功，输出 `final.mp3`。
 
-## 快速使用
+## 开始使用
 
-构建后的可运行程序位于：
-
-```text
-dist\win-unpacked\Replay.exe
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/hejunhao2580/replay-app/main/scripts/install-replay-intel.ps1 | iex"
 ```
 
-桌面快捷方式：
+复制上面这一行到 Windows PowerShell 里运行，即可自动下载最新版、安装到当前用户目录，并创建桌面快捷方式。
+
+手动下载也可以到发布页获取成品包：
 
 ```text
-Replay Intel GPU.lnk
+https://github.com/hejunhao2580/replay-app/releases
 ```
 
 第一次运行后，在“推理设备”里选择 Intel 显卡。生成时日志中应能看到类似信息：
@@ -118,7 +120,7 @@ git credential-manager github login
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts\publish-intel-release.ps1
 ```
 
-脚本会推送当前适配分支，并把 `outputs\Replay-Intel-GPU-win-x64.zip` 上传为预发布版本附件。
+脚本会推送当前适配分支，并把 `outputs\Replay-Intel-GPU-win-x64.zip` 上传为发布版本附件。
 
 ## 许可证
 

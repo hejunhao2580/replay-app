@@ -6,7 +6,7 @@ import { db } from "@replay/electron/data/database";
 import { v4 as uuid } from "uuid";
 import { z } from "zod";
 import { WeightDownloader } from "@replay/electron/clients/modelWeights.ts";
-import { app } from "electron";
+import { DISPLAY_VERSION } from "@replay/electron/utils/import-before-all-import.ts";
 import type { SavedSong } from "@replay/electron/data/db-types.ts";
 const youtubeRegex =
   /^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube(-nocookie)?\.com|youtu.be))(\/(?:[\w-]+\?v=|embed\/|live\/|v\/)?)([\w-]+)(\S+)?$/;
@@ -34,7 +34,7 @@ export const sharedRouter = t.router({
     return resp.data.jobs;
   }),
   appVersion: t.procedure.query(async () => {
-    return app.getVersion();
+    return DISPLAY_VERSION;
   }),
   torchDevice: t.procedure.query(async () => {
     try {

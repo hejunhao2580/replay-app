@@ -8,7 +8,7 @@ import { WeightDownloader } from "../clients/modelWeights.ts";
 import jetpack from "fs-jetpack";
 import { localAudioDir, localModelPath, localOutputsPath } from "../utils/constants";
 import pythonService from "../clients/pythonService.ts";
-import { DESKTOP_VERSION, localAppDir } from "../utils/import-before-all-import.ts";
+import { DESKTOP_VERSION, DISPLAY_VERSION, localAppDir } from "../utils/import-before-all-import.ts";
 import {
   getCurrentLanguage,
   getProductName,
@@ -164,7 +164,9 @@ export const getMenu = () => {
   const text = labels[language];
   const productName = getProductName(language);
   const desktopVersionLabel =
-    DESKTOP_VERSION === "0.0.0-development" ? text.versionDevelopment : `v${DESKTOP_VERSION}`;
+    DESKTOP_VERSION === "0.0.0-development" || DESKTOP_VERSION === "dev"
+      ? text.versionDevelopment
+      : `v${DISPLAY_VERSION}`;
   const desktopVersionMenuLabel =
     language === "zh" ? `版本：${desktopVersionLabel}` : `${productName} ${desktopVersionLabel}`;
 

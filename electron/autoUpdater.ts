@@ -2,6 +2,7 @@ import { isLinux, isMacArm, isMacX64, isWindows } from "./utils/constants";
 import logger from "../shared/logger";
 import { app, dialog, shell } from "electron";
 import { getCurrentLanguage } from "./i18n/language.ts";
+import packageJson from "../package.json";
 
 const updateText = {
   en: {
@@ -45,6 +46,9 @@ const getSubdomain = () => {
 
 export default async function checkForUpdates() {
   try {
+    if ((packageJson as typeof packageJson & { displayVersion?: string }).displayVersion) {
+      return;
+    }
     if (isLinux) {
       return; // no autoupdate
     }

@@ -7,6 +7,8 @@ import packageJson from "../../package.json";
 import isDev from "electron-is-dev";
 
 export const DESKTOP_VERSION = isDev ? "dev" : app.getVersion();
+export const DISPLAY_VERSION =
+  (packageJson as typeof packageJson & { displayVersion?: string }).displayVersion || DESKTOP_VERSION;
 export const appId = packageJson.build.appId;
 
 app.setName("Replay");

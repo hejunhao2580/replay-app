@@ -2,7 +2,8 @@
   "private": true,
   "name": "@replay/main",
   "main": "electron/build/electron/index.js",
-  "version": "0.0.0-development",
+  "version": "1.0.0",
+  "displayVersion": "1.0.0.0",
   "productName": "Replay",
   "author": "Replay",
   "description": "使用 AI 音色生成歌曲的 Replay 界面",
@@ -129,6 +130,7 @@
       "output": "dist"
     },
     "appId": "com.replay.Replay",
+    "buildVersion": "1.0.0.0",
     "extends": null,
     "productName": "Replay",
     "extraMetadata": {

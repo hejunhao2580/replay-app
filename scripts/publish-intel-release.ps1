@@ -2,7 +2,8 @@ param(
   [string]$Repository = "hejunhao2580/replay-app",
   [string]$Branch = "main",
   [string]$ZipPath = "..\..\outputs\Replay-Intel-GPU-win-x64.zip",
-  [string]$Tag = ""
+  [string]$Tag = "",
+  [switch]$Prerelease
 )
 
 $ErrorActionPreference = "Stop"
@@ -74,7 +75,7 @@ Replay Intel GPU Windows build
 - SHA256: $hash
 "@
   draft = $false
-  prerelease = $true
+  prerelease = [bool]$Prerelease
 }
 
 $release = Invoke-GitHubJson -Method "Post" -Uri "https://api.github.com/repos/$Repository/releases" -Body $releaseBody -Token $token
