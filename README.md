@@ -106,10 +106,10 @@ yarn -s lint
 
 ## 发布到 GitHub
 
-成品 zip 不建议直接提交到仓库，应作为 GitHub Release 附件上传。先登录 GitHub CLI：
+成品 zip 不建议直接提交到仓库，应作为 GitHub Release 附件上传。发布脚本不依赖 GitHub CLI，会使用 Git Credential Manager 的网页登录授权。
 
 ```powershell
-gh auth login
+git credential-manager github login
 ```
 
 登录后运行：
