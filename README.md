@@ -23,10 +23,7 @@
 - 验证结果：使用本地音频和 `alan` RVC 模型生成成功，输出 `final.mp3`。
 
 ## 开始使用
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/hejunhao2580/replay-app/main/scripts/install-replay-intel.ps1 | iex"
-```
+`powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/hejunhao2580/replay-app/main/scripts/install-replay-intel.ps1 | iex"`
 
 复制上面这一行到 Windows PowerShell 里运行，即可自动下载最新版、安装到当前用户目录，并创建桌面快捷方式。
 
