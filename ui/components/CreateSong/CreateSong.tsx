@@ -44,67 +44,71 @@ const SubmitButton = () => {
 
   const getButtonCopy = () => {
     if (!isServerRunning) {
-      return "Server not running";
+      return "服务还没启动";
     }
     if (isLoading) {
-      return "Loading...";
+      return "正在创建...";
     }
     if (!songUrlOrFilePath) {
-      return "Select a song";
+      return "先选择音频";
     }
     if (!modelId && options.vocalsOnly) {
-      return "Stem song";
+      return "只分离人声";
     }
     if (!modelId) {
-      return "Select an artist";
+      return "先选择音色";
     }
 
     if (!hasDownloadedStemModel) {
-      return "Download Stem Model First";
+      return "请先下载人声分离模型";
     }
 
     if (!downloaded) {
-      return "Download Selected Model First";
+      return "请先下载选中的音色";
     }
 
     const queuedJobs = (jobs || []).filter((job) => job.status === "queued");
     if (queuedJobs.length === 0) {
-      return "Create Song";
+      return "开始生成";
     }
-    return `Create Song (${queuedJobs.length} queued)`;
+    return `开始生成（排队 ${queuedJobs.length} 个）`;
   };
   const checkCpuWarning = () => {
     if (device === "cpu") {
       const hasSeenCpuWarning = localStorage.getItem(hasSeenCpuWarningKey);
       if (!hasSeenCpuWarning) {
         const didConfirm = confirm(
-          "Warning - your current device is CPU. Replay works best when running on a GPU with CUDA or with a Macbook Pro M1 with MPS. Running on CPU will take significantly longer, and might use up 100% of CPU while it's running. Are you sure you'd like to continue?",
+          "当前使用的是 CPU，生成会明显变慢，也可能让电脑短时间满负载。建议使用 Intel 独立显卡或核显加速。仍然继续吗？",
         );
         if (!didConfirm) {
-          toast.info("Canceled run");
-          return;
+          toast.info("已取消本次生成");
+          return false;
         }
         localStorage.setItem(hasSeenCpuWarningKey, "true");
       }
     }
+    return true;
   };
   const createSongFromPath = async (path: string) => {
     if (path) {
-      logEvent({ event: "createSong", metadata: { ...options } });
-      const resp = await mutateAsync({ modelId, songUrlOrFilePath: path, options });
+      const effectiveOptions = { ...options, device: device || "xpu" };
+      logEvent({ event: "createSong", metadata: { ...effectiveOptions } });
+      const resp = await mutateAsync({ modelId, songUrlOrFilePath: path, options: effectiveOptions });
       if ("jobId" in resp) {
         console.info(`Created song with job id ${resp.jobId}`);
-        toast.info("Song Queued!");
+        toast.info("任务已加入队列");
       } else {
-        toast.error("Error creating song");
+        toast.error("创建任务失败");
       }
     } else {
-      toast.error("Path not set");
+      toast.error("还没有选择音频路径");
     }
   };
   const onClick = async () => {
     if (songUrlOrFilePath) {
-      checkCpuWarning();
+      if (!checkCpuWarning()) {
+        return;
+      }
       await createSongFromPath(songUrlOrFilePath);
       await refetchJobs();
     }
@@ -145,7 +149,7 @@ const SubmitButton = () => {
             onClick={onBatchClick}
             disabled={batchDisabled}
             variant={"outlined"}
-            title={"Batch"}
+            title={"批量导入"}
           >
             <DynamicFeedIcon />
           </Button>
@@ -213,7 +217,7 @@ export const CreateSong = () => {
           maxWidth: 850,
         }}
       >
-        <Typography variant={"h1"}>Create New Song</Typography>
+        <Typography variant={"h1"}>新建翻唱</Typography>
         <CreationFlow />
       </Box>
     </Box>

@@ -13,10 +13,13 @@ import type { Configurator } from "./base.configurator.mts";
 import type { EnvConfig } from "../config.mts";
 import { TypeConfig } from "../enums.mts";
 
-export class EsbuildConfigurator implements Configurator<TypeConfig.esbuild> {
+export class EsbuildConfigurator implements Configurator<typeof TypeConfig.esbuild> {
   public readonly type = TypeConfig.esbuild;
+  public readonly config: EnvConfig;
 
-  constructor(public readonly config: EnvConfig) {}
+  constructor(config: EnvConfig) {
+    this.config = config;
+  }
 
   toBuilderConfig(partial: Partial<BuildOptions>, userConfig: BuildOptions): BuildOptions {
     const additional: Partial<BuildOptions> = {};

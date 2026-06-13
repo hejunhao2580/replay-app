@@ -13,7 +13,7 @@ const DownloadDirectorySettings = () => {
   return (
     <Box sx={{ backgroundColor: "#2c2c2c", p: 2, borderRadius: 2, display: "flex", flexDirection: "column", gap: 2 }}>
       <Box sx={{ display: "flex", flexDirection: "row", alignItems: "center", gap: 2 }}>
-        <Typography variant={"h1"}>Download Location</Typography>
+        <Typography variant={"h1"}>下载位置</Typography>
         <Box sx={{ display: "flex", ml: "auto" }}>
           <Button
             variant="contained"
@@ -25,7 +25,7 @@ const DownloadDirectorySettings = () => {
             sx={{ backgroundColor: "#646464", borderRadius: 2 }}
             endIcon={<Folder />}
           >
-            Select New
+            重新选择
           </Button>
         </Box>
       </Box>
@@ -42,7 +42,7 @@ const AppDirectorySettings = () => {
   return (
     <Box sx={{ backgroundColor: "#2c2c2c", p: 2, borderRadius: 2, display: "flex", flexDirection: "column", gap: 2 }}>
       <Box sx={{ display: "flex", flexDirection: "row", alignItems: "center", gap: 2 }}>
-        <Typography variant={"h1"}>Current App Directory</Typography>
+        <Typography variant={"h1"}>当前数据目录</Typography>
         <Box sx={{ display: "flex", ml: "auto" }}>
           <Button
             variant="contained"
@@ -54,7 +54,7 @@ const AppDirectorySettings = () => {
             sx={{ backgroundColor: "#646464", borderRadius: 2 }}
             endIcon={<Folder />}
           >
-            Select New
+            重新选择
           </Button>
         </Box>
       </Box>
@@ -76,7 +76,7 @@ const PinnedServerToggle = () => {
   return (
     <Box sx={{ backgroundColor: "#2c2c2c", p: 2, borderRadius: 2, display: "flex", flexDirection: "column", gap: 2 }}>
       <Box sx={{ display: "flex", flexDirection: "row", alignItems: "center", gap: 2 }}>
-        <Typography variant={"h1"}>Pin server version to UI version</Typography>
+        <Typography variant={"h1"}>服务端版本跟随界面版本</Typography>
         <Box sx={{ display: "flex", ml: "auto" }}>
           <Switch
             checked={configShouldUsePinnedVersion ?? false}
@@ -99,9 +99,9 @@ const AnalyticsToggle = () => {
     <Box sx={{ backgroundColor: "#2c2c2c", p: 2, borderRadius: 2, display: "flex", flexDirection: "column", gap: 2 }}>
       <Box sx={{ display: "flex", flexDirection: "row", alignItems: "center", gap: 2 }}>
         <Box>
-          <Typography variant={"h1"}>Disable Analytics</Typography>
+          <Typography variant={"h1"}>关闭匿名统计</Typography>
           <Typography variant={"body2"} sx={{ fontStyle: "italic", fontSize: "10px", color: "#646464" }}>
-            {"We use Sentry to collect anonymous crash reports and usage data"}
+            {"仅用于收集匿名崩溃日志和基本使用情况，方便排查问题。"}
           </Typography>
         </Box>
         <Box sx={{ display: "flex", ml: "auto" }}>
@@ -122,7 +122,7 @@ const AnalyticsToggle = () => {
 export const SettingsPage = () => {
   return (
     <Box sx={{ p: 2, m: 2, display: "flex", flexDirection: "column", gap: 2 }}>
-      <Typography variant={"h1"}>Settings</Typography>
+      <Typography variant={"h1"}>设置</Typography>
       <DownloadDirectorySettings />
       <AppDirectorySettings />
       <PinnedServerToggle />

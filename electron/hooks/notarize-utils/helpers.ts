@@ -23,7 +23,11 @@ export async function withTempDir<T>(fn: (dir: string) => Promise<T>) {
 }
 
 class Secret {
-  constructor(private value: string) {}
+  private value: string;
+
+  constructor(value: string) {
+    this.value = value;
+  }
 
   toString() {
     return this.value;

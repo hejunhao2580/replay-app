@@ -8,6 +8,16 @@ import { Cancel } from "@mui/icons-material";
 
 // super hacky way of making sure we only toast once for each jobid/status combo lol
 const toastedIds = new Set<string>();
+const statusLabels: Record<string, string> = {
+  queued: "排队中",
+  processing: "生成中",
+  errored: "出错",
+  completed: "已完成",
+  stopped: "已停止",
+  unknown_job: "任务不存在",
+  unknown: "未知状态",
+};
+
 export default function JobItem({
   cancelJob,
   job,
@@ -36,13 +46,13 @@ export default function JobItem({
       ) {
         if (!toastedIds.has(toastOptions.toastId)) {
           if (status === "completed") {
-            toast.info("Song created successfully!", toastOptions);
+            toast.info("生成完成！", toastOptions);
             toastedIds.add(toastOptions.toastId);
           } else if (status === "errored") {
-            toast.error(`Error creating song: ${error}`, toastOptions);
+            toast.error(`生成失败：${error}`, toastOptions);
             toastedIds.add(toastOptions.toastId);
           } else if (status === "stopped") {
-            toast.error("Song cancelled", toastOptions);
+            toast.error("任务已取消", toastOptions);
             toastedIds.add(toastOptions.toastId);
           }
         }
@@ -50,7 +60,7 @@ export default function JobItem({
         if (status === "completed") {
           const didSucceedInSaving = await saveCompletedSong(jobId);
           if (!didSucceedInSaving) {
-            toast.warning("Failed to save song to database, this should not occur");
+            toast.warning("生成结果保存失败，请检查本地数据目录。");
           }
           await refetchSongList();
         }
@@ -90,7 +100,7 @@ export default function JobItem({
             {title}
           </Typography>
         )}
-        <Typography sx={{ fontSize: "10px", color: "#646464" }}>{startCase(status)}</Typography>
+        <Typography sx={{ fontSize: "10px", color: "#646464" }}>{statusLabels[status] || startCase(status)}</Typography>
         {error && <Typography sx={{ fontSize: "10px", color: "red" }}>{startCase(error)}</Typography>}
       </Box>
 

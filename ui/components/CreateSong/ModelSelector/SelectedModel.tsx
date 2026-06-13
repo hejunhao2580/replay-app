@@ -74,7 +74,7 @@ const ModelDownloadIcon = ({ model }: { model: ArtistModelOption }) => {
   const isDownloading = _isDownloading || Boolean(downloadStatus?.progress);
   React.useEffect(() => {
     if (isError && modelName) {
-      toast.error(`Failed to download ${modelName}: ${errorString}`, {
+      toast.error(`${modelName} 下载失败：${errorString}`, {
         toastId: `downloadError-${modelName}`,
       });
     }
@@ -140,7 +140,7 @@ const ModelDownloadIcon = ({ model }: { model: ArtistModelOption }) => {
         {getIcon()}
       </Box>
       <Box>
-        <ModelDownloadStatusText model={model} notDownlodedText={isDownloading ? "Downloading..." : null} />
+        <ModelDownloadStatusText model={model} notDownlodedText={isDownloading ? "下载中..." : null} />
       </Box>
     </Box>
   );
@@ -168,10 +168,10 @@ const ModelInfo = ({ model }: { model: ArtistModelOption }) => {
         width={"100%"}
         flexWrap={"wrap"}
       >
-        <ArtistInfo title="File" value={`${model.id}.zip`} />
-        {classification && <ArtistInfo title={"Classification"} value={startCase(classification)} />}
-        {model.size !== 0 && model.size && <ArtistInfo title="Size" value={formatter(model.size)} />}
-        {epochs !== 0 && epochs && <ArtistInfo title={"Epochs"} value={epochs} />}
+        <ArtistInfo title="文件" value={`${model.id}.zip`} />
+        {classification && <ArtistInfo title={"分类"} value={startCase(classification)} />}
+        {model.size !== 0 && model.size && <ArtistInfo title="大小" value={formatter(model.size)} />}
+        {epochs !== 0 && epochs && <ArtistInfo title={"训练轮数"} value={epochs} />}
         {Object.entries(extraMeta || {}).map(([key, value]) => {
           return <ArtistInfo key={key} title={startCase(key)} value={value} />;
         })}

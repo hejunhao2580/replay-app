@@ -73,12 +73,12 @@ const AudioRecorder: (props: Props) => ReactElement = ({
     >
       <div className={`audio-recorder ${isRecording ? "recording" : ""}`} data-testid="audio_recorder">
         <img
-          alt={"mic"}
+          alt={"麦克风"}
           src={isRecording ? saveSVG : micSVG}
           className={`audio-recorder-mic`}
           onClick={isRecording ? () => stopAudioRecorder() : startRecording}
           data-testid="ar_mic"
-          title={isRecording ? "Save recording" : "Start recording"}
+          title={isRecording ? "保存录音" : "开始录音"}
         />
         <span className={`audio-recorder-timer ${!isRecording ? "display-none" : ""}`} data-testid="ar_timer">
           {Math.floor(recordingTime / 60)}:{String(recordingTime % 60).padStart(2, "0")}
@@ -101,19 +101,19 @@ const AudioRecorder: (props: Props) => ReactElement = ({
           )}
         </span>
         <img
-          alt={"pause or resume"}
+          alt={"暂停或继续"}
           src={isPaused ? resumeSVG : pauseSVG}
           className={`audio-recorder-options ${!isRecording ? "display-none" : ""}`}
           onClick={togglePauseResume}
-          title={isPaused ? "Resume recording" : "Pause recording"}
+          title={isPaused ? "继续录音" : "暂停录音"}
           data-testid="ar_pause"
         />
         <img
           src={discardSVG}
-          alt={"discard"}
+          alt={"丢弃"}
           className={`audio-recorder-options ${!isRecording ? "display-none" : ""}`}
           onClick={() => stopAudioRecorder(false)}
-          title="Discard Recording"
+          title="丢弃录音"
           data-testid="ar_cancel"
         />
       </div>
@@ -122,7 +122,7 @@ const AudioRecorder: (props: Props) => ReactElement = ({
         sx={{ cursor: "pointer" }}
         variant={"body2"}
       >
-        Record your own
+        录一段自己的声音
       </Typography>
     </Box>
   );

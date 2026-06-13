@@ -8,14 +8,14 @@ export interface LogoProps {
   size?: number;
 }
 export const Logo = ({ size = 200 }: LogoProps) => {
-  return <img src={logoImage} alt={"Replay Logo"} width={size} height={size} />;
+  return <img src={logoImage} alt={"Replay 标志"} width={size} height={size} />;
 };
 
 export const Wordmark = ({ showVersion }: { showVersion?: boolean }) => {
   const { data } = trpcReact.appVersion.useQuery();
   return (
     <Box display={"flex"} alignItems={"center"} flexDirection={"column"} sx={{ userSelect: "none" }}>
-      <Typography variant={"h1"} sx={{ fontSize: 50, lineHeight: "normal", letterSpacing: "-4px" }}>
+      <Typography variant={"h1"} sx={{ fontSize: 50, lineHeight: "normal", letterSpacing: 0 }}>
         Replay
       </Typography>
       {showVersion && data && (

@@ -73,17 +73,17 @@ def install_dependencies():
     print("Installing Python packages...")
     suffix = ""
     if not is_mac:
-        print(f"Setting index url")
-        suffix = "--index-url https://download.pytorch.org/whl/cu118 --extra-index-url https://pypi.org/simple"
+        print(f"Setting Intel XPU PyTorch index url")
+        suffix = "--index-url https://download.pytorch.org/whl/xpu --extra-index-url https://pypi.org/simple"
     os.system(f"{pip_bin} install -r requirements.txt {suffix}")
-    onnx = "onnxruntime"
-    try:
-        os.system(f"{pip_bin} uninstall -y {onnx}")
-    except:
-        pass
+    for onnx in ["onnxruntime", "onnxruntime-gpu", "onnxruntime-openvino"]:
+        try:
+            os.system(f"{pip_bin} uninstall -y {onnx}")
+        except:
+            pass
 
     if not is_mac:
-        onnx = "onnxruntime-gpu"
+        onnx = "onnxruntime-openvino"
     else:
         if is_mac_x64:
             onnx = "onnxruntime-coreml"
@@ -101,13 +101,78 @@ def install_dependencies():
         f.close()
         # replace metadata={help: with metadata={"help":
         lines = lines.replace("metadata={help:", 'metadata={"help":')
+        fairseq_config_defaults = [
+            "CommonConfig",
+            "CommonEvalConfig",
+            "DistributedTrainingConfig",
+            "DatasetConfig",
+            "OptimizationConfig",
+            "CheckpointConfig",
+            "FairseqBMUFConfig",
+            "GenerationConfig",
+            "EvalLMConfig",
+            "InteractiveConfig",
+            "EMAConfig",
+        ]
+        for config_name in fairseq_config_defaults:
+            lines = lines.replace(
+                f": {config_name} = {config_name}()",
+                f": {config_name} = field(default_factory={config_name})",
+            )
         # save updated text
         w = open(fairseq, "w")
         w.write(lines)
         w.close()
         print("Fairseq fixed.")
+        fairseq_init = os.path.join(LIB_PATHS, "fairseq", "dataclass", "initialize.py")
+        if os.path.exists(fairseq_init):
+            f = open(fairseq_init, "r")
+            lines = f.read()
+            f.close()
+            lines = lines.replace(
+                "        v = FairseqConfig.__dataclass_fields__[k].default",
+                "        field = FairseqConfig.__dataclass_fields__[k]\n"
+                "        v = field.default_factory() if not isinstance(field.default_factory, _MISSING_TYPE) else field.default",
+            )
+            if "from dataclasses import _MISSING_TYPE" not in lines:
+                lines = lines.replace(
+                    "import logging\n",
+                    "import logging\nfrom dataclasses import _MISSING_TYPE\n",
+                )
+            w = open(fairseq_init, "w")
+            w.write(lines)
+            w.close()
+            print("Fairseq initialize fixed.")
     else:
         print("Fairseq not found. Skipping fix.")
+
+    hydra_conf = os.path.join(LIB_PATHS, "hydra", "conf", "__init__.py")
+    if os.path.exists(hydra_conf):
+        f = open(hydra_conf, "r")
+        lines = f.read()
+        f.close()
+        hydra_config_defaults = [
+            "OverrideDirname",
+            "JobConfig",
+            "RunDir",
+            "SweepDir",
+            "HelpConf",
+            "HydraHelpConf",
+            "OverridesConf",
+            "JobConf",
+            "RuntimeConf",
+        ]
+        for config_name in hydra_config_defaults:
+            lines = lines.replace(
+                f": {config_name} = {config_name}()",
+                f": {config_name} = field(default_factory={config_name})",
+            )
+        w = open(hydra_conf, "w")
+        w.write(lines)
+        w.close()
+        print("Hydra fixed.")
+    else:
+        print("Hydra not found. Skipping fix.")
 
 
 def main():

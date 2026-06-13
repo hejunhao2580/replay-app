@@ -1,3 +1,4 @@
+/* eslint-disable no-var */
 // Type definitions for non-npm package File System Access API 2020.09
 // Project: https://github.com/WICG/file-system-access
 // Definitions by: Ingvar Stepanyan <https://github.com/RReverser>

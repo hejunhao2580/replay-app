@@ -178,6 +178,60 @@ declare namespace Components {
       devices: string[];
     }
     /**
+     * DeviceInfoResp
+     */
+    export interface DeviceInfoResp {
+      /**
+       * Id
+       */
+      id: "cpu" | "xpu" | "mps";
+      /**
+       * Label
+       */
+      label: string;
+      /**
+       * Backend
+       */
+      backend: string;
+      /**
+       * Model
+       */
+      model?: /* Model */ string | null;
+      /**
+       * Torch Device
+       */
+      torch_device?: /* Torch Device */ string | null;
+      /**
+       * Ort Provider
+       */
+      ort_provider?: /* Ort Provider */ string | null;
+    }
+    /**
+     * DeviceDetailsResp
+     */
+    export interface DeviceDetailsResp {
+      /**
+       * Activedevice
+       */
+      activeDevice: "cpu" | "xpu" | "mps";
+      /**
+       * Activelabel
+       */
+      activeLabel: string;
+      /**
+       * Intelgpumodel
+       */
+      intelGpuModel?: /* Intelgpumodel */ string | null;
+      /**
+       * Ortproviders
+       */
+      ortProviders: string[];
+      /**
+       * Devices
+       */
+      devices: /* DeviceInfoResp */ DeviceInfoResp[];
+    }
+    /**
      * HTTPValidationError
      */
     export interface HTTPValidationError {
@@ -339,7 +393,15 @@ declare namespace Components {
       /**
        * Device
        */
-      device: "cpu" | "cuda" | "xla" | "mps";
+      device: "cpu" | "xpu" | "mps";
+      /**
+       * Label
+       */
+      label?: /* Label */ string | null;
+      /**
+       * Model
+       */
+      model?: /* Model */ string | null;
     }
     /**
      * ValidationError
@@ -378,6 +440,11 @@ declare namespace Paths {
   namespace DeviceOptions {
     namespace Responses {
       export type $200 = /* DeviceOptionsResp */ Components.Schemas.DeviceOptionsResp;
+    }
+  }
+  namespace DeviceDetails {
+    namespace Responses {
+      export type $200 = /* DeviceDetailsResp */ Components.Schemas.DeviceDetailsResp;
     }
   }
   namespace Health {
@@ -450,6 +517,14 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig,
   ): OperationResponse<Paths.DeviceOptions.Responses.$200>;
+  /**
+   * deviceDetails - Device Details
+   */
+  "deviceDetails"(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig,
+  ): OperationResponse<Paths.DeviceDetails.Responses.$200>;
   /**
    * setDevice - Set Device
    */
@@ -556,6 +631,16 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig,
     ): OperationResponse<Paths.DeviceOptions.Responses.$200>;
+  };
+  ["/device_details"]: {
+    /**
+     * deviceDetails - Device Details
+     */
+    "get"(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig,
+    ): OperationResponse<Paths.DeviceDetails.Responses.$200>;
   };
   ["/set_device"]: {
     /**

@@ -19,7 +19,11 @@ export function unsupportedType(type: TypeConfig, env?: "main" | "renderer"): ne
 }
 
 export class Logger {
-  constructor(private namespace: string) {}
+  private namespace: string;
+
+  constructor(namespace: string) {
+    this.namespace = namespace;
+  }
 
   log(...args: unknown[]): void {
     console.log(track(), `(${this.namespace})`, ...args);

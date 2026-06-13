@@ -158,3 +158,5 @@ scripts/temp
 python/done
 python/*.bin
 python/*.html
+.venv-intel/
+.venv-intel310/

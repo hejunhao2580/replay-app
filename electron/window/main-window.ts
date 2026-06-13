@@ -5,6 +5,7 @@ import { mainAppIconDevPng } from "../constants";
 import isDev from "electron-is-dev";
 import { format } from "url";
 import { windows } from "../index";
+import { getWindowTitle } from "../i18n/language.ts";
 
 import logger, { uiLogger } from "../../shared/logger";
 import { join } from "path";
@@ -60,7 +61,7 @@ export const createMainWindow = async () => {
   });
 
   const mainWindow = createWindow({
-    title: "Replay",
+    title: getWindowTitle(),
     minWidth: 930,
     minHeight: 640,
     x: windowState.x,
@@ -94,7 +95,7 @@ export const createSettingsWindow = async () => {
 
   const settingsWindow = createWindow(
     {
-      title: "Settings",
+      title: getWindowTitle(true),
       width,
       height,
       x: (bounds.width - width) / 2,

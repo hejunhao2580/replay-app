@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import List
 
 import psutil
-from fastapi import Body, FastAPI
+from fastapi import Body, FastAPI, HTTPException
 from fastapi.routing import APIRoute
 
 import monkey_patch_init
@@ -19,6 +19,7 @@ from inference.api_models import (
     CreateSongReq,
     CreateSongResp,
     DeviceOptionsResp,
+    DeviceDetailsResp,
     HealthResp,
     JobProgressReq,
     JobProgressResp,
@@ -30,6 +31,7 @@ from inference.api_models import (
     TorchDevice,
 )
 from inference.config import config
+from inference.devices import available_devices, device_details as get_device_details
 from inference.inference_conf import stemming_models_list
 
 
@@ -67,19 +69,21 @@ async def index():
 
 @app.get("/device_options", response_model=DeviceOptionsResp)
 async def device_options():
-    import torch
-
-    devices = ["cpu"]
-    if torch.backends.mps.is_available():
-        devices.append("mps")
-    if torch.cuda.is_available():
-        devices.append("cuda")
+    devices = [device.id for device in available_devices()]
     return DeviceOptionsResp(devices=devices)
+
+
+@app.get("/device_details", response_model=DeviceDetailsResp)
+async def device_details():
+    return DeviceDetailsResp(**get_device_details(config.device))
 
 
 @app.post("/set_device")
 async def set_device(body: SetDeviceReq = Body(...)):
-    config.device = body.device
+    device_ids = [device.id for device in available_devices()]
+    if body.device not in device_ids:
+        raise HTTPException(status_code=400, detail=f"这台电脑当前不可用该推理设备：{body.device}")
+    config.set_device(body.device)
     return {"ok": True}
 
 
@@ -93,7 +97,7 @@ async def song_progress(body: JobProgressReq = Body(...)):
     """Create the song."""
     jobId = body.jobId
     if jobId not in RUNNING_JOBS:
-        return JobProgressResp(status="unknown_job", message="Error: Job not found")
+        return JobProgressResp(status="unknown_job", message="错误：找不到这个任务")
     print("Health: ", RUNNING_JOBS[jobId])
     return RUNNING_JOBS[jobId]
 
@@ -106,6 +110,10 @@ def run_inference(body: CreateSongReq, job_id: str):
     if job_id not in RUNNING_JOBS:
         return
     try:
+        if body.options and body.options.device:
+            config.set_device(body.options.device)
+            logger.info("Using requested job device: %s", config.device)
+
         # Callbacks for setting status/checking shutdown
         def set_status(status: JobProgressResp):
             status.jobId = job_id
@@ -134,6 +142,13 @@ def run_inference(body: CreateSongReq, job_id: str):
 @app.post("/create_song", response_model=CreateSongResp)
 async def create_song(body: CreateSongReq = Body(...)):
     """Create the song."""
+    if body.options and body.options.device:
+        device_ids = [device.id for device in available_devices()]
+        if body.options.device not in device_ids:
+            raise HTTPException(status_code=400, detail=f"这台电脑当前不可用该推理设备：{body.options.device}")
+        config.set_device(body.options.device)
+        logger.info("Queued job requested device: %s", config.device)
+
     job_id = uuid.uuid4().hex
     resp = CreateSongResp(jobId=job_id)
 
@@ -144,7 +159,7 @@ async def create_song(body: CreateSongReq = Body(...)):
 
     RUNNING_JOBS[job_id] = JobProgressResp(
         status="queued",
-        message="Waiting to start...",
+        message="等待开始...",
         options=body.options,
         jobId=job_id,
         modelId=body.modelId or body.options.stemmingMethod or "",
@@ -184,7 +199,8 @@ async def jobs():
 
 @app.get("/torch_device", response_model=TorchDevice)
 async def torch_device():
-    return TorchDevice(device=config.device)
+    details = get_device_details(config.device)
+    return TorchDevice(device=config.device, label=details.get("activeLabel"), model=details.get("intelGpuModel"))
 
 
 @app.get("/stemming_models", response_model=StemmingModelsResp)

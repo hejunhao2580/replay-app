@@ -5,7 +5,7 @@ from typing import List, Literal, Optional
 
 from pydantic import BaseModel, Field
 
-from inference.config import DEVICE
+from inference.devices import DEVICE
 from inference.uvr.constants import DEMUCS_ARCH_TYPE, MDX_ARCH_TYPE, VR_ARCH_TYPE
 
 F0_METHODS = Literal["pm", "harvest", "crepe", "crepe-tiny", "mangio-crepe", "mangio-crepe-tiny", "rmvpe"]
@@ -13,6 +13,7 @@ OUTPUT_FORMATS = Literal["wav", "mp3_192k", "mp3_320k"]
 
 
 class CreateSongOptions(BaseModel):
+    device: Optional[DEVICE] = Field(default=None)
     pitch: Optional[int] = Field(default=None)
     instrumentalsPitch: Optional[int] = Field(default=None)
     preStemmed: Optional[bool] = Field(default=False)
@@ -85,6 +86,8 @@ class ShutdownResp(BaseModel):
 
 class TorchDevice(BaseModel):
     device: DEVICE = Field(default=...)
+    label: Optional[str] = Field(default=None)
+    model: Optional[str] = Field(default=None)
 
 
 MODEL_TYPES = Literal[DEMUCS_ARCH_TYPE, MDX_ARCH_TYPE, VR_ARCH_TYPE]
@@ -106,6 +109,23 @@ class HealthResp(BaseModel):
 
 class DeviceOptionsResp(BaseModel):
     devices: List[str] = Field(default=...)
+
+
+class DeviceInfoResp(BaseModel):
+    id: DEVICE = Field(default=...)
+    label: str = Field(default=...)
+    backend: str = Field(default=...)
+    model: Optional[str] = Field(default=None)
+    torch_device: Optional[str] = Field(default=None)
+    ort_provider: Optional[str] = Field(default=None)
+
+
+class DeviceDetailsResp(BaseModel):
+    activeDevice: DEVICE = Field(default=...)
+    activeLabel: str = Field(default=...)
+    intelGpuModel: Optional[str] = Field(default=None)
+    ortProviders: List[str] = Field(default=...)
+    devices: List[DeviceInfoResp] = Field(default=...)
 
 
 class SetDeviceReq(BaseModel):

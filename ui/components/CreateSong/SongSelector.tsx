@@ -74,7 +74,7 @@ const FileDropper = ({ onSelect }: SongSelectProps) => {
       <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", py: "4px", gap: "2px" }}>
         <CloudUploadRounded fontSize="large" />
         <Typography variant={"body2"} sx={{ whiteSpace: "pre" }}>
-          Select or drop audio here
+          选择音频，或拖到这里
         </Typography>
       </Box>
     </DropContainer>
@@ -115,7 +115,7 @@ const YoutubeUrlInput = ({ onSelect, songUrlOrFilePath }: SongSelectProps) => {
         }
       }}
       defaultValue={isYoutubeUrl ? songUrlOrFilePath : undefined}
-      placeholder={"Enter YouTube URL"}
+      placeholder={"粘贴 YouTube 链接"}
     />
   );
 };
@@ -130,7 +130,7 @@ async function blobToBuffer(blob: Blob) {
     function onLoadEnd() {
       reader.removeEventListener("loadend", onLoadEnd, false);
       if (!reader.result) {
-        reject(new Error("Empty file"));
+        reject(new Error("文件为空"));
       } else {
         resolve(new Uint8Array(reader.result as ArrayBuffer));
       }
@@ -195,7 +195,7 @@ export const SongSelector = () => {
   const filename = songUrlOrFilePath?.replace(/^.*([\\/:])/, "");
   const isUUidv4 = songUrlOrFilePath?.match(/Recorded Audio/i);
   const isUrl = songUrlOrFilePath?.match(/^(http|https):\/\/[^ "]+$/);
-  const songSelectionText = `${isUUidv4 ? "Custom audio recording" : isUrl ? "URL" : filename}`;
+  const songSelectionText = `${isUUidv4 ? "录音音频" : isUrl ? "网络链接" : filename}`;
 
   useEffect(() => {
     if (songUrlOrFilePath) {
@@ -222,7 +222,7 @@ export const SongSelector = () => {
       }}
     >
       <Box sx={{ display: "flex", alignItems: "center", width: "100%", gap: 1 }}>
-        <Typography variant={"h4"}>{songUrlOrFilePath ? "Audio selected: " : "Select Audio"}</Typography>
+        <Typography variant={"h4"}>{songUrlOrFilePath ? "已选择音频：" : "选择音频"}</Typography>
         {songUrlOrFilePath && <Chip color="primary" onDelete={() => onSelect(null)} label={songSelectionText} />}
       </Box>
       <Box sx={{ display: "flex", alignItems: "center", width: "100%", justifyContent: "space-between", mt: 1 }}>
@@ -237,7 +237,7 @@ export const SongSelector = () => {
       </Box>
       <Box sx={{ display: "flex", alignItems: "center", width: "100%", justifyContent: "center" }}>
         <Typography sx={{ my: 0.5, fontSize: 12 }} variant={"body1"}>
-          or
+          或者
         </Typography>
       </Box>
       <Box sx={{ display: "flex", alignItems: "center", width: "100%", justifyContent: "center" }}>

@@ -19,6 +19,7 @@ from scipy import signal
 from torch import Tensor
 
 from inference.config import Config
+from inference.devices import empty_device_cache
 from inference.rmvpe import model_rmvpe
 
 bh, ah = signal.butter(N=5, Wn=48, btype="high", fs=16000)
@@ -320,7 +321,7 @@ class VC:
                 score, ix = index.search(npy, k=8)
                 weight = np.square(1 / score)
                 weight /= weight.sum(axis=1, keepdims=True)
-                if ix != -1:
+                if np.all(ix != -1):
                     npy = np.sum(big_npy[ix] * np.expand_dims(weight, axis=2), axis=1)
                     feats = torch.from_numpy(npy).unsqueeze(0).to(self.device) * index_rate + (1 - index_rate) * feats
 
@@ -350,8 +351,7 @@ class VC:
                 infer_data = infer[0][0, 0]
                 audio1 = infer_data.data.cpu().float().numpy()
             del feats, p_len, padding_mask
-            if torch.cuda.is_available():
-                torch.cuda.empty_cache()
+            empty_device_cache()
             return audio1
 
     def pipeline(
@@ -379,21 +379,21 @@ class VC:
         index = big_npy = None
         if file_index and os.path.exists(file_index) and index_rate > 0:
             try:
-                status_report("Loading index...")
+                status_report("正在加载索引...")
                 index: Optional[IndexIVFFlat] = faiss.read_index(file_index)
                 big_npy = index.reconstruct_n(0, index.ntotal)
-                if not big_npy or big_npy.size == 0:
+                if big_npy is None or big_npy.size == 0:
                     index = big_npy = None
             except Exception as e:
                 logger.error(e)
                 traceback.print_exc()
                 index = big_npy = None
 
-        status_report("Loading audio...")
+        status_report("正在加载音频...")
         audio = signal.filtfilt(bh, ah, audio)
         audio_pad = np.pad(audio, (self.window // 2, self.window // 2), mode="reflect")
         opt_ts = []
-        status_report("Processing audio...")
+        status_report("正在处理音频...")
         if audio_pad.shape[0] > self.t_max:
             audio_sum = np.zeros_like(audio)
             for i in range(self.window):
@@ -494,6 +494,5 @@ class VC:
             max_int16 /= audio_max
         audio_opt = (audio_opt * max_int16).astype(np.int16)
         del pitch, pitchf, sid
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
+        empty_device_cache()
         return audio_opt

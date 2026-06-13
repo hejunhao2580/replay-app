@@ -151,18 +151,18 @@ class RVCModel:
         filter_radius = 3
         resample_sr = 0
 
-        status_report(f"Loading audio...")
+        status_report("正在加载音频...")
         audio = load_audio(input_audio_path, 16000)
-        status_report("Processing audio...")
+        status_report("正在处理音频...")
         audio_max = np.abs(audio).max() / 0.95
         if audio_max > 1:
             audio /= audio_max
         times = [0, 0, 0]
-        status_report(f"Loading hubert model...")
+        status_report("正在加载 Hubert 模型...")
         hubert_model.load_model(weights_path)
         logger.info(f"Loaded hubert model")
         if f0_method == "rmvpe":
-            logger.info(f"Loading rmvpe model...")
+            logger.info("正在加载 RMVPE 模型...")
             model_rmvpe.load_model(weights_path)
             logger.info(f"Loaded rmvpe model")
         if_f0 = self.cpt.get("f0", 1)

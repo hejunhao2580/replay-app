@@ -80,10 +80,10 @@ section. Instead of stating "harvest" into your arguments in the f0 feature extr
 hybrid[harvest+dio+pm+crepe]" for example. This f0 nanmedian hybrid method will take very long during feature
 extraction. Please, if you're willing to use hybrid f0, be patient.
 
-## If you get CUDA issues with crepe training, or pm and harvest etc.
+## If you get resource issues with crepe training, or pm and harvest etc.
 
-This is due to the number of processes (n_p) being too high. Make sure to cut the number of threads down. Please lower
-the value of the "Number of CPU Threads to use" slider on the feature extraction GUI.
+This is usually due to the number of processes (n_p) being too high. Make sure to cut the number of threads down. Please
+lower the value of the CPU thread count slider on the feature extraction GUI.
 
 ## Windows/MacOS
 

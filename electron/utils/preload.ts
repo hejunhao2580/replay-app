@@ -40,6 +40,15 @@ try {
     console.log("dispatching clear-cache");
     window.dispatchEvent(new Event("clear-cache"));
   });
+  contextBridge.exposeInMainWorld("language", {
+    get: () => ipcRenderer.invoke("language:get"),
+    set: (language: "en" | "zh") => ipcRenderer.invoke("language:set", language),
+    onChanged: (callback: (language: "en" | "zh") => void) => {
+      const listener = (_event: Electron.IpcRendererEvent, language: "en" | "zh") => callback(language);
+      ipcRenderer.on("language-changed", listener);
+      return () => ipcRenderer.removeListener("language-changed", listener);
+    },
+  });
   // contextBridge.exposeInMainWorld("fs", fs);
   // contextBridge.exposeInMainWorld("Buffer", Buffer);
 } catch (e) {

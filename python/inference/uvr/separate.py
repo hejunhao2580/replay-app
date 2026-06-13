@@ -25,6 +25,7 @@ from demucs.model_v2 import auto_load_demucs_model_v2
 from demucs.pretrained import get_model as _gm
 from demucs.utils import apply_model_v1, apply_model_v2
 from inference.config import config
+from inference.devices import empty_device_cache
 from inference.uvr.constants import (
     ALL_STEMS,
     ARM,
@@ -226,8 +227,8 @@ class SeparateMDX(SeparateAttributes):
                     return data
                 except Exception as e:
                     print(e)
-                    if "CUDA_PATH" in str(e):
-                        print("CUDA_PATH not found, switching to CPU only execution")
+                    if "OpenVINO" in str(e) or "GPU" in str(e):
+                        print("OpenVINO GPU execution failed, switching to CPU only execution")
                         inference_session = ort.InferenceSession(self.model_path, providers=["CPUExecutionProvider"])
                         data = inference_session.run(None, {"input": spek.cpu().numpy()})[0]
                         print(f"Time taken to separate using MDX: {timer() - start}")
@@ -267,7 +268,7 @@ class SeparateMDX(SeparateAttributes):
 
             self.write_audio(secondary_stem_path, self.secondary_source, samplerate)
 
-        torch.cuda.empty_cache()
+        empty_device_cache()
 
     def initialize_model_settings(self):
         self.n_bins = self.n_fft // 2 + 1
@@ -413,7 +414,7 @@ class SeparateDemucs(SeparateAttributes):
         source: np.array = self.run_mixer(raw_mix, source)
 
         del self.demucs
-        torch.cuda.empty_cache()
+        empty_device_cache()
 
         if isinstance(source, np.ndarray):
             if len(source) == 2:
@@ -575,7 +576,7 @@ class SeparateVR(SeparateAttributes):
 
             self.write_audio(secondary_stem_path, self.secondary_source, 44100)
 
-        torch.cuda.empty_cache()
+        empty_device_cache()
 
     def loading_mix(self):
         X_wave, X_spec_s = {}, {}

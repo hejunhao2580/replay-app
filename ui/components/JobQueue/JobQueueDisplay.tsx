@@ -40,7 +40,7 @@ export default function JobQueueDisplay() {
       return;
     }
     await removeJobFromQueue(jobId);
-    toast.warning("Job cancelled.");
+    toast.warning("任务已取消。");
     refetchJobs();
   };
 
@@ -49,23 +49,23 @@ export default function JobQueueDisplay() {
       return;
     }
     try {
-      toast.warning("Cancelling job. Will terminate after current step.", { toastId: jobId });
+      toast.warning("正在取消任务，当前步骤结束后会停止。", { toastId: jobId });
       await stopJob(jobId);
-      toast.warning("Job cancelled. Will terminate after current step.", { toastId: jobId });
+      toast.warning("任务已取消，当前步骤结束后会停止。", { toastId: jobId });
     } catch (e) {
       console.log(e);
-      toast.error(`Failed to cancel job: ${e}`, { toastId: jobId });
+      toast.error(`取消任务失败：${e}`, { toastId: jobId });
     }
   };
 
   const headerCopy = () => {
     if (runningJobCount) {
-      return `${runningJobCount} Song${runningJobCount > 1 ? "s" : ""} Queued`;
+      return `${runningJobCount} 个任务正在排队`;
     }
     if (erroredJobs.length) {
-      return `${erroredJobs.length} Job${erroredJobs.length > 1 ? "s" : ""} Errored`;
+      return `${erroredJobs.length} 个任务出错`;
     }
-    return "No Jobs Running";
+    return "当前没有任务";
   };
   return (
     <Box

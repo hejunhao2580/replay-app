@@ -1,6 +1,24 @@
 import { isLinux, isMacArm, isMacX64, isWindows } from "./utils/constants";
 import logger from "../shared/logger";
 import { app, dialog, shell } from "electron";
+import { getCurrentLanguage } from "./i18n/language.ts";
+
+const updateText = {
+  en: {
+    checkErrorTitle: "Error checking for update",
+    title: "New Update Available",
+    message: "New Update Available - would you like to download it now?",
+    notNow: "Not now",
+    yes: "Yes",
+  },
+  zh: {
+    checkErrorTitle: "检查更新失败",
+    title: "发现新版本",
+    message: "发现新版本，要现在去下载吗？",
+    notNow: "暂不下载",
+    yes: "下载",
+  },
+};
 
 const getSubdomain = () => {
   if (isWindows) {
@@ -49,7 +67,7 @@ export default async function checkForUpdates() {
         logger.info("Internet disconnected, not checking for updates");
         return;
       }
-      dialog.showErrorBox("Error checking for update", content);
+      dialog.showErrorBox(updateText[getCurrentLanguage()].checkErrorTitle, content);
     });
 
     autoUpdater.on("update-available", async () => {
@@ -61,9 +79,9 @@ export default async function checkForUpdates() {
         // }
         const resp = await dialog.showMessageBox({
           type: "info",
-          title: "New Update Available",
-          message: "New Update Available - would you like to download it now?",
-          buttons: ["Not now", "Yes"],
+          title: updateText[getCurrentLanguage()].title,
+          message: updateText[getCurrentLanguage()].message,
+          buttons: [updateText[getCurrentLanguage()].notNow, updateText[getCurrentLanguage()].yes],
           cancelId: 1,
         });
         if (resp.response === 1) {

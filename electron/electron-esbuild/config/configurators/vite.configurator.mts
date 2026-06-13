@@ -11,10 +11,13 @@ import type { Configurator } from "./base.configurator.mts";
 import type { EnvConfig } from "../config.mts";
 import { TypeConfig } from "../enums.mts";
 
-export class ViteConfigurator implements Configurator<TypeConfig.vite> {
+export class ViteConfigurator implements Configurator<typeof TypeConfig.vite> {
   public readonly type = TypeConfig.vite;
+  public readonly config: EnvConfig;
 
-  constructor(public readonly config: EnvConfig) {}
+  constructor(config: EnvConfig) {
+    this.config = config;
+  }
 
   toBuilderConfig(partial: Partial<InlineConfig>): InlineConfig {
     let external = partial?.build?.rollupOptions?.external;

@@ -52,6 +52,14 @@ export const sharedRouter = t.router({
       return [];
     }
   }),
+  deviceDetails: t.procedure.query(async () => {
+    try {
+      const resp = await api.deviceDetails();
+      return resp.data;
+    } catch (e) {
+      return null;
+    }
+  }),
   clearJob: t.procedure.input(z.string()).mutation(async (req) => {
     try {
       const resp = await api.clearJob(null, { jobId: req.input });
@@ -83,10 +91,13 @@ export const sharedRouter = t.router({
     .mutation(async (req) => {
       const { input } = req;
       const { songUrlOrFilePath, modelId, options } = input;
+      const { device: _staleDevice, ...optionValues } = options || {};
+      const currentDeviceResp = await api.torchDevice();
+      const effectiveOptions = { ...optionValues, device: currentDeviceResp.data.device };
       const resp = await api.createSong(null, {
         songUrlOrFilePath,
         modelId,
-        options,
+        options: effectiveOptions,
         modelPath: localModelPath,
         outputDirectory: localOutputsPath,
         weightsPath: localWeightsPath,
@@ -108,7 +119,7 @@ export const sharedRouter = t.router({
           outputDirectory: localOutputsPath,
           weightsPath: localWeightsPath,
           id: uuid(),
-          options,
+          options: effectiveOptions,
           youtubeUrl,
         };
         await db.saveNewSong(newSong);

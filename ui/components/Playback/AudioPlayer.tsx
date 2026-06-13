@@ -161,19 +161,19 @@ export default function AudioPlayer({ song, type, waveform }: { waveform?: boole
   let title: string = "";
   switch (type) {
     case "original_song":
-      title = "Original Song";
+      title = "原始歌曲";
       break;
     case "original_vocals":
-      title = "Original Vocals";
+      title = "原始人声";
       break;
     case "pre_deecho_original_vocals":
-      title = "Pre Deecho Vocals";
+      title = "去混响前人声";
       break;
     case "converted_vocals":
-      title = "Converted Vocals";
+      title = "转换后人声";
       break;
     case "instrumentals":
-      title = "Instrumentals";
+      title = "伴奏";
       break;
   }
 
@@ -182,9 +182,9 @@ export default function AudioPlayer({ song, type, waveform }: { waveform?: boole
     try {
       await copyFileToDownloads({ song, type });
       logEvent({ event: "audioDownload", metadata: { type } });
-      toast.info(`Copied to Downloads`, { toastId });
+      toast.info(`已保存到“下载”文件夹`, { toastId });
     } catch (e) {
-      toast.error(`Failed to copy to Downloads: ${e}`, { toastId });
+      toast.error(`保存到“下载”文件夹失败：${e}`, { toastId });
     }
   };
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types, @typescript-eslint/no-unused-vars */
 declare module "meow" {
   /**
    Matches any [primitive value](https://developer.mozilla.org/en-US/docs/Glossary/Primitive).

@@ -24,7 +24,7 @@ export interface SongEntryProps {
 export const getSongName = (song: SavedSong) => {
   let filename = song.parsedTrackName || path.parse(song.songPath || song.originalFilePath).name;
   if (filename.startsWith("Recorded Audio")) {
-    filename = `Custom Recording as ${song.modelId}`;
+    filename = `录音转换为 ${song.modelId}`;
   }
   const name = song.displayName || startCase(filename);
   return name;
@@ -35,14 +35,14 @@ const getPreviewText = (song: SavedSong | undefined, modelName: string) => {
     return "";
   }
   const date = new Date(song?.dateStarted ?? 0);
-  const timeString = date.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "numeric",
-    hour12: true,
+  const timeString = date.toLocaleTimeString("zh-CN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
   });
-  const text = [startCase(modelName), date.toLocaleDateString(), timeString].filter(Boolean);
+  const text = [startCase(modelName), date.toLocaleDateString("zh-CN"), timeString].filter(Boolean);
 
-  return text.join(" • ");
+  return text.join(" / ");
 };
 
 export const SongEntry = ({ song, style }: SongEntryProps) => {
@@ -130,7 +130,7 @@ export const SongEntry = ({ song, style }: SongEntryProps) => {
             setIsEditing(true);
           }}
         >
-          Edit
+          编辑名称
         </Item>
         <Item
           id={`remove-${song.id}`}
@@ -142,7 +142,7 @@ export const SongEntry = ({ song, style }: SongEntryProps) => {
             }
           }}
         >
-          Delete
+          删除作品
         </Item>
         {song.songPath && (
           <Item
@@ -150,18 +150,18 @@ export const SongEntry = ({ song, style }: SongEntryProps) => {
             onClick={async () => {
               if (song.songPath) {
                 const toastId = song.songPath;
-                toast.info(`Copying to Downloads`, { toastId });
+                toast.info(`正在保存到“下载”文件夹`, { toastId });
                 try {
                   await copyFileToDownloads({ song, type: "song" });
                   logEvent({ event: "audioDownload", metadata: { type: "song" } });
-                  toast.success(`Copied to Downloads`, { toastId });
+                  toast.success(`已保存到“下载”文件夹`, { toastId });
                 } catch (e) {
-                  toast.error(`Failed to copy to Downloads`, { toastId });
+                  toast.error(`保存到“下载”文件夹失败`, { toastId });
                 }
               }
             }}
           >
-            Save to Downloads
+            保存到下载文件夹
           </Item>
         )}
       </Menu>

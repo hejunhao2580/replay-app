@@ -33,6 +33,7 @@ import JobQueueDisplay from "../components/JobQueue/JobQueueDisplay";
 import { useAnalytics } from "../hooks/useAnalytics";
 import { SettingsPage } from "../components/Settings/SettingsPage";
 import { CircularProgress } from "@mui/material";
+import { installDomTranslator } from "../i18n/domTranslator";
 
 export const queryCache = new QueryCache({
   onError: (err, query) => {
@@ -75,6 +76,53 @@ window.addEventListener("clear-cache", () => {
   queryClient.clear();
 });
 
+const LanguageSync = () => {
+  const setLanguage = useReplay((state) => state.setLanguage);
+
+  useEffect(() => {
+    const languageBridge = window.language;
+    if (!languageBridge) {
+      setLanguage("en");
+      document.documentElement.lang = "en";
+      return;
+    }
+
+    let isMounted = true;
+    languageBridge.get().then((language) => {
+      if (!isMounted) {
+        return;
+      }
+      setLanguage(language);
+      document.documentElement.lang = language === "zh" ? "zh-CN" : "en";
+    });
+
+    const unsubscribe = languageBridge.onChanged((language) => {
+      setLanguage(language);
+      document.documentElement.lang = language === "zh" ? "zh-CN" : "en";
+    });
+
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
+  }, [setLanguage]);
+
+  return null;
+};
+
+const UiDomTranslator = () => {
+  const language = useReplay((state) => state.language);
+
+  useEffect(() => {
+    if (!document.body) {
+      return;
+    }
+    return installDomTranslator(language);
+  }, [language]);
+
+  return null;
+};
+
 const clientSideEmotionCache = createEmotionCache();
 const toastId = "server-starting-toast";
 const ServerStartupNotifications = () => {
@@ -92,8 +140,8 @@ const ServerStartupNotifications = () => {
     if (isServerRunning === undefined || !pythonServiceStatus) {
       return;
     }
-    const status = pythonServiceStatus || "Unknown server status...";
-    if (status.startsWith("Starting server")) {
+    const status = pythonServiceStatus || "后台服务状态未知...";
+    if (status.startsWith("正在启动后台服务")) {
       toast.info(status, { toastId, autoClose: false, closeOnClick: false, closeButton: false });
     } else {
       console.log(status);
@@ -188,6 +236,8 @@ export const ContextProviders = ({ children }: { children: React.ReactNode }) =>
         <QueryClientProvider client={queryClient}>
           <ReactQueryDevtools position="bottom-right" />
           {!isProd && <ReactQueryDevtools position="bottom-right" />}
+          <LanguageSync />
+          <UiDomTranslator />
           {children}
           <ToastContainer position="top-right" theme="dark" />
         </QueryClientProvider>

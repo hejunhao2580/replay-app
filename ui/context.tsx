@@ -10,7 +10,10 @@ export interface VoiceModelFilters {
   gender?: string;
 }
 export type SongListSort = "date" | "model" | "track";
+export type AppLanguage = "en" | "zh";
 export interface AppContext {
+  language: AppLanguage;
+  setLanguage: (language: AppLanguage) => void;
   search: string | null;
   setSearch: (search: string | null) => void;
   modelId: string | null;
@@ -33,6 +36,8 @@ const useReplay = create<AppContext>()(
   devtools(
     persist(
       (set) => ({
+        language: "en",
+        setLanguage: (language: AppLanguage) => set({ language }),
         volume: 1.0,
         setVolume: (volume: number) => set({ volume }),
         songListSort: "date",

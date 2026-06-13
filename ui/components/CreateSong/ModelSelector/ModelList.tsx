@@ -45,7 +45,7 @@ const ModelNameFilter = ({ setFilter }: { setFilter: Dispatch<SetStateAction<nul
         ref: inputRef,
       }}
       onChange={onFilterChange}
-      placeholder={`Filter models`}
+      placeholder={`搜索音色模型`}
     />
   );
 };

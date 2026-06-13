@@ -1,13 +1,18 @@
 import os
 import platform
 import shutil
+import sys
 from pathlib import Path
 
 import PyInstaller.__main__
+from repair_deps import main as repair_deps
+
+sys.setrecursionlimit(max(sys.getrecursionlimit(), 10000))
 
 is_windows = os.name == "nt"
 is_linux = not is_windows and os.uname().sysname == "Linux"
 is_mac = not is_windows and platform.system() == "Darwin"
+repair_deps()
 print("Running PyInstaller")
 
 hidden_import = [
@@ -26,10 +31,14 @@ to_collect = [
     "--collect-all",
     "onnxruntime",
     "--collect-all",
-    "onnxruntime-gpu",
+    "onnxruntime-openvino",
 ]
 
 suffix = []
+intel_runtime_bin = Path(sys.prefix) / "Library" / "bin"
+if intel_runtime_bin.exists():
+    suffix.extend(["--add-binary", f"{intel_runtime_bin / '*.dll'}{os.pathsep}."])
+
 name_suffix = "mac"
 if is_windows:
     name_suffix = "win"

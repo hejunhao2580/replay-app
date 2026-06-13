@@ -10,10 +10,12 @@ import type { PossibleConfiguration } from "../config/types.mts";
 
 export abstract class BaseBuilder<T extends PossibleConfiguration | null> implements Builder {
   readonly env: string;
+  protected readonly _config: Item<T>;
 
   abstract readonly hasInitialBuild: boolean;
 
-  protected constructor(protected readonly _config: Item<T>) {
+  protected constructor(_config: Item<T>) {
+    this._config = _config;
     this.env = this._config.isMain ? "Main" : this._config.isRenderer ? "Renderer" : "Unknown env";
   }
 

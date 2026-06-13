@@ -43,10 +43,10 @@ const SongEditModal = ({ song, onClose }: { song: SavedSong; onClose: () => void
         }}
       >
         <Typography id="modal-edit-title" variant="h2" component="h1">
-          Edit Song Details
+          编辑作品信息
         </Typography>
         <TextField
-          label="Song name"
+          label="作品名称"
           size="small"
           onChange={(event) => setUpdatedName(event.target.value)}
           value={updatedName}
@@ -54,10 +54,10 @@ const SongEditModal = ({ song, onClose }: { song: SavedSong; onClose: () => void
         />
         <Box sx={{ display: "flex", flexDirection: "row", justifyContent: "flex-end", gap: 1 }}>
           <Button variant="text" onClick={onClose}>
-            Cancel
+            取消
           </Button>
           <Button variant="contained" onClick={() => handleEditName()} disabled={!updatedName}>
-            Save
+            保存
           </Button>
         </Box>
       </Box>

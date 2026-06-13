@@ -26,11 +26,78 @@ import decompress from "decompress";
 import fsp from "fs/promises";
 import axiosRetry from "axios-retry";
 import { db } from "../data/database.ts";
+import { getCurrentLanguage, getProductName } from "../i18n/language.ts";
 
 const logger = serverLogger;
 
+const serverText = {
+  en: {
+    fetchingLatest: (version: string) => `Fetching latest backend service, version ${version}`,
+    checkingFile: (current: number, total: number) => `Checking file ${current}/${total}`,
+    downloadingFile: (current: number, total: number) => `Downloading file ${current}/${total}`,
+    extractingFile: (current: number, total: number) => `Extracting file ${current}/${total}`,
+    usingBundled: "Using the backend service included with the app",
+    downloadingLatest: "Downloading latest backend service",
+    downloadComplete: "Download complete",
+    errorPrefix: "Error",
+    running: "Backend service is running",
+    reusingExisting: "Detected an existing backend service; reusing it.",
+    starting: "Starting backend service...",
+    startingAlready: "Backend service is already starting...",
+    portUnavailable: "Backend service port is unavailable",
+    missingBackend: "Backend service program was not found",
+    missingBackendBody: "Backend service program was not found (python or packaged service file).",
+    backendStderr: (message: string) => `Backend service error: ${message}`,
+    stopped: "Backend service stopped",
+    exited: (code: Error | number | null) => `Backend service exited unexpectedly, exit code ${code}`,
+    backendError: (message: string) => `Backend service error: ${message}`,
+    appErrorTitle: () => `${getProductName("en")} ran into a problem`,
+    appErrorBody: (message: string) => `${message}.\n\nPlease report this issue from the app menu.`,
+    retryStopped: "Backend service failed more than 3 times. Retry stopped.",
+    stopping: "Stopping backend service...",
+    quitting: "Quitting app...",
+  },
+  zh: {
+    fetchingLatest: (version: string) => `正在获取最新版后台服务，版本 ${version}`,
+    checkingFile: (current: number, total: number) => `正在检查文件 ${current}/${total}`,
+    downloadingFile: (current: number, total: number) => `正在下载文件 ${current}/${total}`,
+    extractingFile: (current: number, total: number) => `正在解压文件 ${current}/${total}`,
+    usingBundled: "正在使用随软件提供的后台服务",
+    downloadingLatest: "正在下载最新版后台服务",
+    downloadComplete: "下载完成",
+    errorPrefix: "出错",
+    running: "后台服务已启动",
+    reusingExisting: "检测到已有后台服务，已复用。",
+    starting: "正在启动后台服务...",
+    startingAlready: "后台服务正在启动...",
+    portUnavailable: "后台服务端口不可用",
+    missingBackend: "找不到后台服务程序",
+    missingBackendBody: "找不到后台服务程序（python 或打包后的服务文件）。",
+    backendStderr: (message: string) => `后台服务报错：${message}`,
+    stopped: "后台服务已停止",
+    exited: (code: Error | number | null) => `后台服务异常退出，退出码 ${code}`,
+    backendError: (message: string) => `后台服务出错：${message}`,
+    appErrorTitle: () => `${getProductName("zh")}出错了`,
+    appErrorBody: (message: string) => `${message}。\n\n请在软件菜单里反馈这个问题。`,
+    retryStopped: "后台服务连续出错超过 3 次，已停止重试",
+    stopping: "正在停止后台服务...",
+    quitting: "正在退出应用...",
+  },
+};
+
+const getServerText = () => serverText[getCurrentLanguage()];
+
 axiosRetry(axios, { retries: 2 });
 const delay = (delayMs: number) => new Promise<void>((resolve) => setTimeout(resolve, delayMs));
+const getPackagedServerBinName = () => {
+  if (isWindows) {
+    return "packager-win.exe";
+  }
+  if (isLinux) {
+    return "packager-linux";
+  }
+  return "packager-mac";
+};
 
 const isRunning = (pid: number) => {
   try {
@@ -120,7 +187,12 @@ class PythonService {
   server: ChildProcess.ChildProcess | null = null;
   serverKilled = false;
   serverShutdown: Promise<void> | null = null;
-  PYTHON_SERVER_PATH = path.join(localAppDir, "server");
+  private startServerPromise: Promise<void> | null = null;
+  private beforeQuitRegistered = false;
+  private readonly bundledServerPath = path.join(RESOURCES_PATH, "server");
+  private readonly usingBundledServer =
+    !isDev && fs.existsSync(path.join(this.bundledServerPath, getPackagedServerBinName()));
+  PYTHON_SERVER_PATH = this.usingBundledServer ? this.bundledServerPath : path.join(localAppDir, "server");
   progress: null | AxiosProgressEvent = null;
   config: RemoteConfig | null = null;
   fileCount: number = 0;
@@ -134,6 +206,14 @@ class PythonService {
   async pythonServerIsValid() {
     if (isDev) {
       return true;
+    }
+    if (this.usingBundledServer) {
+      const isValid = await this.bundledServerIsValid();
+      if (isValid && !this.server) {
+        logger.info("Using bundled Python server, starting");
+        this.startServer();
+      }
+      return isValid;
     }
     if (this.isDownloading) {
       return false;
@@ -160,6 +240,9 @@ class PythonService {
   async pythonServerIsValidFast() {
     if (isDev) {
       return true;
+    }
+    if (this.usingBundledServer) {
+      return this.bundledServerIsValid();
     }
     if (this.isDownloading) {
       logger.info("Server is downloading, not counting install as valid");
@@ -201,6 +284,15 @@ class PythonService {
       }),
     );
     return allValid.every((v) => v);
+  }
+
+  private async bundledServerIsValid() {
+    const binpath = await this.getBinPath();
+    const exists = Boolean(await jetpack.existsAsync(binpath));
+    if (!exists) {
+      serverLogger.info(`Bundled server binary not found: ${binpath}`);
+    }
+    return exists;
   }
 
   async fetchLatestConfig() {
@@ -295,7 +387,7 @@ class PythonService {
     const invalidOrMissingFiles: ManifestEntry[] = [];
     for (let i = 0; i < entries.length; i++) {
       if (!fastBail) {
-        this.setDownloadStatus(`Checking file ${i + 1} of ${entries.length}`);
+        this.setDownloadStatus(getServerText().checkingFile(i + 1, entries.length));
       }
       const [name, entry] = entries[i];
       const { sha1: fileSha1, path: filePath, file_size } = entry;
@@ -370,7 +462,7 @@ class PythonService {
   }
   private async fetchRemoteServer(config: RemoteConfig) {
     try {
-      this.setDownloadStatus(`Fetching latest server - using ${config.version} version`);
+      this.setDownloadStatus(getServerText().fetchingLatest(config.version));
       const entriesToDownload: ManifestEntry[] = await this.getInvalidOrMissingFiles(config);
       this.fileCount = entriesToDownload.length;
       this.totalSize = entriesToDownload.reduce((acc, { zip_size: size }) => acc + size, 0);
@@ -379,7 +471,7 @@ class PythonService {
       for (const entry of entriesToDownload) {
         const { sha1: fileSha1, path: filePath, zip_size } = entry;
         this.currentFileNum++;
-        this.setDownloadStatus(`Fetching file ${this.currentFileNum} of ${this.fileCount}`);
+        this.setDownloadStatus(getServerText().downloadingFile(this.currentFileNum, this.fileCount));
         this.progress = null;
         const relFilePath = path.join(this.PYTHON_SERVER_PATH, filePath);
         const exists = await fs.promises.stat(relFilePath).catch(() => false);
@@ -392,7 +484,7 @@ class PythonService {
           }
         }
         const downloadPath = await this.download(entry);
-        this.setDownloadStatus(`Decompressing file ${this.currentFileNum} of ${this.fileCount}`);
+        this.setDownloadStatus(getServerText().extractingFile(this.currentFileNum, this.fileCount));
         this.totalSizeDownloaded += Number(zip_size);
         await jetpack.removeAsync(relFilePath);
         await decompress(downloadPath, this.PYTHON_SERVER_PATH);
@@ -405,6 +497,10 @@ class PythonService {
     }
   }
   removeLocalServer = async () => {
+    if (this.usingBundledServer) {
+      serverLogger.info("Bundled server is in use, skipping server removal");
+      return;
+    }
     await jetpack.removeAsync(this.PYTHON_SERVER_PATH);
   };
 
@@ -420,16 +516,21 @@ class PythonService {
       this.fileCount = 0;
       this.totalSize = 0;
       this.totalSizeDownloaded = 0;
-      this.setDownloadStatus("Downloading latest server");
+      if (this.usingBundledServer) {
+        this.setDownloadStatus(getServerText().usingBundled);
+        await this.startServer();
+        return;
+      }
+      this.setDownloadStatus(getServerText().downloadingLatest);
       const config = await this.fetchLatestConfig();
       await this.fetchRemoteServer(config);
-      this.setDownloadStatus("Download complete");
+      this.setDownloadStatus(getServerText().downloadComplete);
       await this.checkAndCreateSymLinks(config);
       await fsp.writeFile(path.join(this.PYTHON_SERVER_PATH, "version.txt"), config.version);
       await this.startServer();
     } catch (error: any) {
       this.error = error;
-      this.setDownloadStatus(`Error: ${error}`);
+      this.setDownloadStatus(`${getServerText().errorPrefix}: ${error}`);
       serverLogger.error(error);
     } finally {
       this.downloadStatus = "";
@@ -452,14 +553,7 @@ class PythonService {
         return bin;
       }
     }
-    let binName = "packager-mac";
-    if (isWindows) {
-      binName = "packager-win.exe";
-    }
-    if (isLinux) {
-      binName = "packager-linux";
-    }
-    return path.join(this.PYTHON_SERVER_PATH, binName);
+    return path.join(this.PYTHON_SERVER_PATH, getPackagedServerBinName());
   }
   async checkServerPortAvailable(port: number): Promise<void> {
     const inUse = await tcpPortUsed.check(port);
@@ -468,11 +562,31 @@ class PythonService {
     }
   }
 
+  private async serverOnPortIsHealthy() {
+    try {
+      await axios.get(`http://127.0.0.1:${apiPort}/health`, {
+        timeout: 1500,
+        httpAgent,
+        httpsAgent,
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  private isPortInUseError(message: string | undefined) {
+    if (!message) {
+      return false;
+    }
+    return message.includes("10048") || message.toLowerCase().includes("address already in use");
+  }
+
   getPathEnvVariable() {
     const localBinPath = path.join(RESOURCES_PATH, "bin");
-    serverLogger.info(`Adding ${localBinPath} to PATH`);
+    serverLogger.info(`Adding ${localBinPath} and ${this.PYTHON_SERVER_PATH} to PATH`);
     const pathSplitter = isWindows ? ";" : ":";
-    return `${localBinPath}${pathSplitter}${process.env.PATH}`;
+    return `${localBinPath}${pathSplitter}${this.PYTHON_SERVER_PATH}${pathSplitter}${process.env.PATH}`;
   }
 
   getScriptPath() {
@@ -487,7 +601,7 @@ class PythonService {
         count++;
 
         if (count > 10) {
-          throw new Error("Server binary not found");
+          throw new Error(getServerText().missingBackend);
         }
       }
 
@@ -538,9 +652,28 @@ class PythonService {
     }
   }
   async startServer(retries = 2) {
-    this.statusMessage = "Starting server...";
+    if (this.startServerPromise) {
+      this.statusMessage = getServerText().startingAlready;
+      serverLogger.info("Server startup already in progress, waiting for it");
+      return this.startServerPromise;
+    }
+
+    this.startServerPromise = this.startServerImpl(retries).finally(() => {
+      this.startServerPromise = null;
+    });
+    return this.startServerPromise;
+  }
+
+  private async startServerImpl(retries = 2) {
+    this.statusMessage = getServerText().starting;
     if (this.server) {
       serverLogger.info("Server already running, not starting");
+      return;
+    }
+
+    if (await this.serverOnPortIsHealthy()) {
+      this.statusMessage = getServerText().reusingExisting;
+      serverLogger.info("A healthy backend service is already listening, reusing it");
       return;
     }
 
@@ -552,8 +685,13 @@ class PythonService {
     try {
       await this.checkServerPortAvailable(apiPort);
     } catch {
-      this.statusMessage = "Server port not available";
+      this.statusMessage = getServerText().portUnavailable;
       serverLogger.warn("Port is not available");
+      if (await this.serverOnPortIsHealthy()) {
+        this.statusMessage = getServerText().reusingExisting;
+        serverLogger.info("Port is occupied by a healthy backend service, reusing it");
+        return;
+      }
       if (isDev) {
         return;
       }
@@ -563,8 +701,8 @@ class PythonService {
     const binPath = await this.getBinPath();
 
     if (!binPath) {
-      this.statusMessage = "Server binary not found";
-      showErrorAlert("Error", "Server binary (python or dist) not found.");
+      this.statusMessage = getServerText().missingBackend;
+      showErrorAlert(getServerText().errorPrefix, getServerText().missingBackendBody);
       return;
     }
     const parentPid = process.pid;
@@ -581,6 +719,7 @@ class PythonService {
       serverLogger.info(`Server already exists, not starting...`);
       return;
     }
+    this.serverKilled = false;
     this.server = execa(`"${binPath}"`, args, {
       stdio: ["ignore", "pipe", "pipe"],
       shell: true,
@@ -623,17 +762,21 @@ class PythonService {
         return;
       }
       lastError = errorOutput;
-      this.statusMessage = `Server received error: ${errorOutput}`;
+      this.statusMessage = getServerText().backendStderr(errorOutput);
     });
 
     const serverStartTime = Date.now();
 
+    const spawnedServer = this.server;
     this.serverShutdown = new Promise<Error | number | null>((resolve) => {
-      this.server!.once("error", resolve);
-      this.server!.once("exit", resolve);
-    }).then((errorOrCode) => {
+      spawnedServer.once("error", resolve);
+      spawnedServer.once("exit", resolve);
+    }).then(async (errorOrCode) => {
+      if (this.server === spawnedServer) {
+        this.server = null;
+      }
       if (this.serverKilled) {
-        this.statusMessage = `Server has been killed`;
+        this.statusMessage = getServerText().stopped;
         return;
       }
 
@@ -647,55 +790,63 @@ class PythonService {
       } else if (lastError) {
         error = new Error(`'${lastError}' (${errorOrCode})`);
       } else {
-        error = new Error(`Server shutdown unexpectedly with code ${errorOrCode}`);
+        error = new Error(getServerText().exited(errorOrCode));
       }
-      this.statusMessage = `Server hit an error: ${error.message}`;
+      this.statusMessage = getServerText().backendError(error.message);
 
       serverLogger.error(error);
       serverLogger.error(["server-exit", error.message, (error as any).code?.toString() || ""]);
 
-      showErrorAlert("Replay hit an error", `${error.message}.\n\nPlease file an issue in the Replay Discord`);
+      if (this.isPortInUseError(lastError || error.message) && (await this.serverOnPortIsHealthy())) {
+        this.statusMessage = getServerText().reusingExisting;
+        serverLogger.warn("Spawned backend exited because the port is already used by a healthy service");
+        return;
+      }
+
+      showErrorAlert(getServerText().appErrorTitle(), getServerText().appErrorBody(error.message));
 
       // Retry limited times, but not for near-immediate failures.
       if (retries > 0 && serverRunTime > 5000) {
         // This will break the app, so refresh it
         windows.forEach((window) => window.reload());
-        return this.startServer(retries - 1);
+        return this.startServerImpl(retries - 1);
       }
-      this.statusMessage = `Server errored >3 times, no longer retrying...`;
+      this.statusMessage = getServerText().retryStopped;
 
-      // If we've run out of retries, throw (kill the app entirely)
-      throw error;
+      serverLogger.error("Backend service retries exhausted");
     });
 
-    app.on("before-quit", (event) => {
-      serverLogger.info("App is quitting, killing server");
-      if (this.server && !this.serverKilled) {
-        // Don't shutdown until we've tried to kill the server
-        event.preventDefault();
-        this.serverKilled = true;
-        (async () => {
-          try {
-            if (this.server) {
-              this.statusMessage = "Killing server...";
-              serverLogger.info("Killing server");
-              await stopServer(this.server);
-              serverLogger.info("Server killed");
+    if (!this.beforeQuitRegistered) {
+      this.beforeQuitRegistered = true;
+      app.on("before-quit", (event) => {
+        serverLogger.info("App is quitting, killing server");
+        if (this.server && !this.serverKilled) {
+          // Don't shutdown until we've tried to kill the server
+          event.preventDefault();
+          this.serverKilled = true;
+          (async () => {
+            try {
+              if (this.server) {
+                this.statusMessage = getServerText().stopping;
+                serverLogger.info("Killing server");
+                await stopServer(this.server);
+                serverLogger.info("Server killed");
+              }
+            } catch (error) {
+              serverLogger.error("Failed to kill server", error);
+              serverLogger.error(error);
+            } finally {
+              // We've done our best - now shut down for real.
+              serverLogger.info("Quitting app");
+              app.quit();
+              this.statusMessage = getServerText().quitting;
+              serverLogger.close();
             }
-          } catch (error) {
-            serverLogger.error("Failed to kill server", error);
-            serverLogger.error(error);
-          } finally {
-            // We've done our best - now shut down for real.
-            serverLogger.info("Quitting app");
-            app.quit();
-            this.statusMessage = "Quitting app...";
-            serverLogger.close();
-          }
-        })();
-        return false;
-      }
-    });
+          })();
+          return false;
+        }
+      });
+    }
   }
 }
 

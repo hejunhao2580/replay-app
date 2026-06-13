@@ -37,7 +37,7 @@ export class EsbuildBuilder extends BaseBuilder<BuildOptions> {
     { wait: 200 },
   );
 
-  constructor(protected readonly _config: Item<BuildOptions>) {
+  constructor(_config: Item<BuildOptions>) {
     super(_config);
   }
 

@@ -13,7 +13,7 @@ import { ArrowForward } from "@mui/icons-material";
 import theme from "../theme.ts";
 import { useDevice, useModelDownloadStatus, useModelList } from "../../hooks/dataHooks.ts";
 
-const steps = ["Add audio track", "Select artist", "Advanced", "System Requirements", "Create song"];
+const steps = ["添加音频", "选择音色", "高级设置", "系统要求", "开始生成"];
 const SysReqStep = () => {
   const { data: device } = useDevice();
   return (
@@ -21,24 +21,24 @@ const SysReqStep = () => {
       <Box key={2} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         <Typography variant="body2">
           {
-            "Replay needs at least 8gb of RAM to run, but works best with more than 16gb. If you have less than 16gb, you can still use Replay, but you may experience crashes or poor performance."
+            "Replay 至少需要 8GB 内存，建议 16GB 或更高。内存较小时也能使用，但可能更慢，长音频还可能失败。"
           }
         </Typography>
         <Typography variant="body2">
           {
-            "Replay also needs a GPU. If you don't have a GPU, you can still use Replay, but you'll need to use the CPU inference mode, which is much slower (~20x)."
+            "为了加快生成速度，建议使用 Intel GPU 加速。如果没有可用显卡，也可以用 CPU 模式，只是会慢很多。"
           }
         </Typography>
         {device === "cpu" && (
           <Typography variant="body2" fontWeight={"bold"}>
             {
-              "Unfortunately it looks like you have a CPU, which means that inference will be much slower. You can still use Replay, but your CPU will be at 100% while you create songs, and might freeze your computer while it runs."
+              "当前检测到使用 CPU。你仍然可以生成歌曲，但处理时电脑可能会明显卡顿。"
             }
           </Typography>
         )}
-        {device && ["mps", "cuda"].includes(device) && (
+        {device && ["mps", "xpu"].includes(device) && (
           <Typography variant="body2" fontWeight={"bold"}>
-            {`Good news! It looks like your machine will run using ${device.toUpperCase()}, which is much faster than CPU.`}
+            {device === "xpu" ? "已检测到 Intel GPU，加速已准备好。" : "已检测到 Apple GPU，加速已准备好。"}
           </Typography>
         )}
       </Box>
@@ -47,48 +47,43 @@ const SysReqStep = () => {
 };
 const stepContent = [
   <Box key={0} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-    <Typography variant="body2">{"Welcome! Let's create your first song"}</Typography>
+    <Typography variant="body2">{"欢迎使用！我们先生成第一首歌。"}</Typography>
     <Typography variant="body2">
       {
-        "To start, you'll select your audio source. These can be local audio files, a YouTube video, or a voice recording. Recording your own voice is especially useful for creating talking conversions instead of music."
+        "第一步先选择音频来源。可以用本地音频、YouTube 链接，也可以直接录一段自己的声音。录音更适合做说话声音转换。"
       }
     </Typography>
-    <Typography variant="body2">{"Click next, and we'll preload an example song for you."}</Typography>
+    <Typography variant="body2">{"点击下一步后，我们会帮你加载一段示例音频。"}</Typography>
   </Box>,
   <Box key={1} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
     <Typography variant="body2">
       {
-        "Next, you'll need to select the artist you want to convert with. We've already put a few tested, high-quality models in your favorites, but you can download and favorite as many of the 4000+ models we have available."
+        "接下来选择要转换成的音色。收藏里已经放了一些测试过的模型，你也可以从模型库里下载更多音色。"
       }
     </Typography>
     <Typography variant="body2">
-      {"Just note, not all models have been tested. Model quality may vary, and some models may not work at all."}
+      {"注意：不同模型质量差异较大，有些模型可能效果一般，甚至无法正常生成。"}
     </Typography>
-    <Typography variant="body2">{"Click next, and we'll select an example artist for you."}</Typography>
+    <Typography variant="body2">{"点击下一步后，我们会先帮你选一个示例音色。"}</Typography>
   </Box>,
   <Box key={2} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
     <Typography variant="body2">
       {
-        "Default settings will give you the best chance of high-quality songs, but if you'd like to tune these, you can change them all in advanced settings."
+        "默认设置通常最稳。如果你想微调效果，可以在高级设置里改音高、人声分离方式和其他参数。"
       }
     </Typography>
     <Typography variant="body2">
       {
-        "There you can select pitch conversion settings, track splitting methods, and even detailed inference settings. You can also upload your own models."
-      }
-    </Typography>
-    <Typography variant="body2">
-      {
-        "These settings can drastically change the quality of your songs, so we recommend joining our Discord to learn more about how to use these."
+        "你也可以导入自己的 RVC 音色模型，让软件使用本地模型生成。"
       }
     </Typography>
   </Box>,
   <SysReqStep key={"sys-req"} />,
   <Box key={3} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-    <Typography variant="body2">{"That's all you need to know!"}</Typography>
+    <Typography variant="body2">{"准备好了！"}</Typography>
     <Typography variant="body2">
       {
-        "You can queue as many songs as you'd like, and view their progress in the bottom left. Once a song finishes, you'll see it show up in your library on the left."
+        "你可以连续添加多个任务，在左下角查看进度。生成完成后，作品会出现在左侧列表中。"
       }
     </Typography>
   </Box>,
@@ -195,7 +190,7 @@ export default function OnboardingModal({ refetch }: { refetch: () => void }) {
           <Box sx={{ mt: 2, mb: 1 }}>{stepContent[activeStep]}</Box>
           <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
             <Button onClick={handleDismiss} sx={{ mr: 1, color: theme.colors.lightGray }}>
-              Not now
+              暂时跳过
             </Button>
             <Button
               color="inherit"
@@ -204,11 +199,11 @@ export default function OnboardingModal({ refetch }: { refetch: () => void }) {
               sx={{ mr: 1, borderRadius: 2, backgroundColor: "#646464" }}
               variant="contained"
             >
-              Back
+              上一步
             </Button>
             <Box sx={{ flex: "1 1 auto" }} />
             <Button onClick={handleNext} variant="contained" sx={{ borderRadius: 2 }} endIcon={<ArrowForward />}>
-              {isFinalStep ? (isDownloadingModel ? `Downloading model${getDownloadProgress()}` : "Finish") : "Next"}
+              {isFinalStep ? (isDownloadingModel ? `正在下载模型${getDownloadProgress()}` : "完成") : "下一步"}
             </Button>
           </Box>
         </Box>

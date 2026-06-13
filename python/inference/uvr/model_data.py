@@ -2,7 +2,9 @@ import hashlib
 import os
 
 import psutil
-import torch
+
+from inference.config import config
+from inference.devices import active_device_memory_gb
 
 from inference.uvr.constants import (
     ALL_STEMS,
@@ -413,15 +415,16 @@ def determine_auto_chunks(chunks, gpu):
     if chunks == "Full":
         chunk_set = 0
     elif chunks == "Auto":
-        if gpu == 0:
-            gpu_mem = round(torch.cuda.get_device_properties(0).total_memory / 1.074e9)
-            if gpu_mem <= 6:
-                chunk_set = 5
-            elif 6 < gpu_mem < 16:
-                chunk_set = 10
-            elif gpu_mem >= 16:
-                chunk_set = 40
-        if gpu == -1:
+        if gpu:
+            gpu_mem = active_device_memory_gb()
+            if gpu_mem:
+                if gpu_mem <= 6:
+                    chunk_set = 5
+                elif 6 < gpu_mem < 16:
+                    chunk_set = 10
+                elif gpu_mem >= 16:
+                    chunk_set = 40
+        if gpu == -1 or not chunk_set:
             sys_mem = psutil.virtual_memory().total >> 30
             if sys_mem <= 4:
                 chunk_set = 1
@@ -455,7 +458,7 @@ class ModelData:
         self.model_hash = None
         self.demucs_source_map = None
         self.demucs_version = None
-        self.is_gpu_conversion = True
+        self.is_gpu_conversion = config.device != "cpu"
         self.is_normalization = False
         self.is_primary_stem_only = False
         self.is_secondary_stem_only = False

@@ -2,9 +2,19 @@
 from PyInstaller.utils.hooks import collect_all
 
 datas = []
-binaries = []
+binaries = [('C:\\Users\\32818\\Documents\\Codex\\2026-06-13\\d-ai-reply-github-reply-gpu\\work\\replay-app\\.venv-intel310\\Library\\bin\\*.dll', '.')]
 hiddenimports = ['app']
 tmp_ret = collect_all('fairseq')
+datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
+tmp_ret = collect_all('torchcrepe')
+datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
+tmp_ret = collect_all('torchaudio')
+datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
+tmp_ret = collect_all('torch')
+datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
+tmp_ret = collect_all('onnxruntime')
+datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
+tmp_ret = collect_all('onnxruntime-openvino')
 datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
 
 

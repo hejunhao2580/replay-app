@@ -5,11 +5,13 @@
   "version": "0.0.0-development",
   "productName": "Replay",
   "author": "Replay",
-  "description": "UI for generating songs with AI singers",
+  "description": "使用 AI 音色生成歌曲的 Replay 界面",
   "repository": "https://github.com/tryreplay/replay-app",
   "scripts": {
     "check-signature": "spctl --assess -vvvv dist/mac/Replay.app; spctl --assess -vvvv dist/mac-arm64/Replay.app; codesign -vvv --deep --strict dist/mac/Replay.app; codesign -vvv --deep --strict dist/mac-arm64/Replay.app",
     "package": "yarn build:notarize && cross-env NODE_ENV=production APP_ENV=production ELECTRON=true REPLAY_PORT=62362 electron-builder build",
+    "package:intel-win": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-intel-windows.ps1",
+    "sync:upstream-intel": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/sync-upstream-intel.ps1",
     "build:notarize": "node scripts/build-notarize.js",
     "update:config": "node scripts/update-r2-config.js",
     "update-version": "node scripts/update-version.js && yarn prettier -w package.json",
@@ -178,6 +180,13 @@
     "extraResources": [
       "./assets/**/*",
       {
+        "from": "python/dist/server",
+        "to": "server",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
         "from": "node_modules/ffmpeg-static-fork/ffmpeg",
         "to": "bin/ffmpeg"
       },
@@ -253,7 +262,7 @@
       "entitlements": "electron/entitlements.plist",
       "entitlementsInherit": "electron/entitlements.plist",
       "extendInfo": {
-        "NSMicrophoneUsageDescription": "Replay needs your microphone to record your audio"
+        "NSMicrophoneUsageDescription": "Replay 需要使用麦克风来录制你的声音"
       },
       "darkModeSupport": true,
       "hardenedRuntime": true,

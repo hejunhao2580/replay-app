@@ -19,8 +19,8 @@ pyworld==0.3.4
 PyYAML==6.0.1
 scipy==1.11.1
 soundfile==0.12.1
-torch==2.0.1
-torchaudio==2.0.2
+torch>=2.5.0
+torchaudio>=2.5.0
 torchcrepe==0.0.21
 uvicorn==0.23.2
 yt-dlp==2023.7.6

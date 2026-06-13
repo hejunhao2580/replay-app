@@ -26,7 +26,7 @@ export const ModelDropper = () => {
     if (!isZip) {
       const pth = acceptedFiles.find((l) => l.path.endsWith("pth"));
       if (!pth) {
-        toast.error("No pth file found in selection");
+        toast.error("没有找到 .pth 音色模型文件");
         return;
       }
       selectedPath = pth.path;
@@ -35,11 +35,11 @@ export const ModelDropper = () => {
       const newModel = await mutateAsync(selectedPath);
       await refetchModels();
       if (newModel) {
-        toast.success(`Successfully added ${newModel.name}`);
+        toast.success(`已添加音色：${newModel.name}`);
         setModelId(newModel.id);
       }
     } catch (e: any) {
-      toast.error(`Failed to add model: ${e?.message || e}`);
+      toast.error(`添加模型失败：${e?.message || e}`);
     }
   };
   const { getRootProps, getInputProps, isFocused, isDragAccept, isDragReject } = useDropzone({
@@ -69,7 +69,7 @@ export const ModelDropper = () => {
         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", py: "4px", gap: "2px" }}>
           {isLoading ? <CircularProgress color={"primary"} /> : <CloudUploadRounded fontSize="large" />}
           <Typography sx={{ whiteSpace: "pre" }} variant={"body2"}>
-            Select an artist from the list or drop a custom RVC model
+            从列表选择音色，或拖入本地 RVC 模型
           </Typography>
         </Box>
       </DropContainer>
@@ -116,9 +116,9 @@ export const ModelDropper = () => {
                   {} as Record<string, string[]>,
                 );
                 console.log(groupedByFirstDir);
-                toast.info(`Starting batch import`);
+                toast.info(`开始批量导入`);
                 for (const [firstDir, paths] of Object.entries(groupedByFirstDir)) {
-                  toast.info(`Importing from ${firstDir}`);
+                  toast.info(`正在从 ${firstDir} 导入`);
                   const joinedPaths = paths.map((p) => commonPath + p);
                   const acceptedFiles = joinedPaths.map((p) => {
                     return { path: p };
@@ -126,7 +126,7 @@ export const ModelDropper = () => {
                   await onDrop(acceptedFiles);
                 }
                 for (const file of rootFiles) {
-                  toast.info(`Importing from ${file}`);
+                  toast.info(`正在从 ${file} 导入`);
                   const joinedPaths = [commonPath + file];
                   const acceptedFiles = joinedPaths.map((p) => {
                     return { path: p };
@@ -140,7 +140,7 @@ export const ModelDropper = () => {
             input.click();
           }}
         >
-          Batch Import
+          批量导入
         </Item>
       </Menu>
     </>

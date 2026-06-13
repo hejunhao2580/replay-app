@@ -38,10 +38,7 @@ export class ViteBuilder extends BaseBuilder<InlineConfig> {
     }
   }
 
-  constructor(
-    protected readonly _config: Item<InlineConfig>,
-    { build: vBuild, createServer: vCreateServer }: { build: Builder; createServer: ServerFactory },
-  ) {
+  constructor(_config: Item<InlineConfig>, { build: vBuild, createServer: vCreateServer }: { build: Builder; createServer: ServerFactory }) {
     super(_config);
 
     if (!_config.fileConfig) {

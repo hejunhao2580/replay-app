@@ -27,16 +27,16 @@ export const ModelContextMenu = ({ id, model }: { id: string; model: ArtistModel
       <Item
         id={`remove-${model.id}`}
         onClick={async () => {
-          toast.info(`Removing ${model.name}`);
+          toast.info(`正在删除 ${model.name}`);
           await removeModel(model.id);
           refetchModels();
-          toast.success(`Removed ${model.name}`);
+          toast.success(`已删除 ${model.name}`);
           if (isSelected) {
             setModelId(null);
           }
         }}
       >
-        Delete
+        删除模型
       </Item>
       <Item
         id={`show-${model.id}`}
@@ -44,7 +44,7 @@ export const ModelContextMenu = ({ id, model }: { id: string; model: ArtistModel
           await showModelInFinder(model.id);
         }}
       >
-        Show in finder
+        在文件夹中显示
       </Item>
     </Menu>
   );
@@ -106,7 +106,7 @@ export const Model = ({ model }: { model: ArtistModelOption }) => {
             </Typography>
           </Box>
           <Typography variant="body2" sx={{ fontSize: 12, fontWeight: 300 }}>
-            <ModelDownloadStatusText model={model} notDownlodedText={"Not Downloaded"} />
+            <ModelDownloadStatusText model={model} notDownlodedText={"未下载"} />
             {sizeString}
           </Typography>
         </Box>

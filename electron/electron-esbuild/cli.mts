@@ -16,7 +16,11 @@ export interface CliFlags extends AnyFlags {
 export type CliResult = Result<CliFlags>;
 
 export abstract class Cli {
-  protected constructor(protected cli: CliResult) {}
+  protected cli: CliResult;
+
+  protected constructor(cli: CliResult) {
+    this.cli = cli;
+  }
 
   abstract init(): Promise<void>;
 }

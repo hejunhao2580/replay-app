@@ -38,7 +38,7 @@ DEMUCS_VERSION_MAPPER = {
 
 # Menu Options
 
-AUTO_SELECT = "Auto"
+AUTO_SELECT = "自动"
 
 # Extensions
 
@@ -51,28 +51,28 @@ JSON = ".json"
 
 # GUI Buttons
 
-START_PROCESSING = "Start Processing"
-WAIT_PROCESSING = "Please wait..."
-STOP_PROCESSING = "Halting process, please wait..."
+START_PROCESSING = "开始处理"
+WAIT_PROCESSING = "请稍候..."
+STOP_PROCESSING = "正在停止处理，请稍候..."
 
 # ---Messages and Logs----
 
 MODEL_PRESENT = "present"
 
 UNRECOGNIZED_MODEL = (
-    "Unrecognized Model Detected",
-    " is an unrecognized model.\n\n" + "Would you like to select the correct parameters before continuing?",
+    "检测到未知模型",
+    " 是无法识别的模型。\n\n" + "是否先选择正确参数再继续？",
 )
 
 STOP_PROCESS_CONFIRM = (
-    "Confirmation",
-    "You are about to stop all active processes.\n\nAre you sure you wish to continue?",
+    "请确认",
+    "即将停止所有正在处理的任务。\n\n确定要继续吗？",
 )
 PICKLE_CORRU = (
-    "File Corrupted",
-    "Unable to load this ensemble.\n\n" + "Would you like to remove this ensemble from your list?",
+    "文件已损坏",
+    "无法加载这个组合配置。\n\n" + "是否从列表中移除它？",
 )
-DELETE_ENS_ENTRY = "Confirm Removal", "Are you sure you want to remove this entry?"
+DELETE_ENS_ENTRY = "确认移除", "确定要移除这一项吗？"
 
 ALL_STEMS = "All Stems"
 VOCAL_STEM = "Vocals"

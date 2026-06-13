@@ -164,7 +164,7 @@ const CreateSongButton = () => {
       variant={"contained"}
       onClick={() => setSelectedPlaybackSongId(null)}
     >
-      New Song
+      新建翻唱
     </Button>
   );
 };
@@ -174,7 +174,7 @@ const JoinDiscordButton = () => {
     <Box sx={{ mt: -1, mb: 2 }}>
       <a href="https://discord.gg/A5rgNwDRd4" target="_blank" rel="noreferrer">
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Typography variant="body2">Join the Replay Discord</Typography>
+          <Typography variant="body2">加入 Replay 社区</Typography>
           <img src={discordImage} width={20} height={15} />
         </Box>
       </a>
@@ -183,9 +183,9 @@ const JoinDiscordButton = () => {
 };
 
 const SORT_OPTIONS = [
-  { value: "date", label: "Sort by Date" },
-  { value: "model", label: "Group by Model" },
-  { value: "track", label: "Group by Song" },
+  { value: "date", label: "按日期排序" },
+  { value: "model", label: "按音色分组" },
+  { value: "track", label: "按歌曲分组" },
 ] as const;
 
 const LibraryDisplay = () => {
@@ -199,17 +199,17 @@ const LibraryDisplay = () => {
   return (
     <>
       <Typography sx={{ fontWeight: 600, my: 1, ml: 3, alignSelf: "start" }} variant={"h3"}>
-        Your Library
+        我的作品
       </Typography>
       {!atLeastOneCompletedSong ? (
-        <Typography>No songs yet!</Typography>
+        <Typography>还没有作品</Typography>
       ) : (
         <Box sx={{ px: 2, width: "100%", zIndex: 999, mb: 2 }}>
           <Select<(typeof SORT_OPTIONS)[number]>
             theme={selectTheme}
             name={"sort"}
             value={SORT_OPTIONS.find((l) => l.value === songListSort)}
-            placeholder={"Sort"}
+            placeholder={"排序方式"}
             blurInputOnSelect
             options={SORT_OPTIONS}
             onChange={(value) => {
@@ -223,7 +223,7 @@ const LibraryDisplay = () => {
                 color: state.isSelected ? "white" : baseStyles.color,
               }),
             }}
-            getOptionLabel={(option) => startCase(option.label)}
+            getOptionLabel={(option) => option.label}
             getOptionValue={(option) => option.value}
             onBlur={() => {}}
           />

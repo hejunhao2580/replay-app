@@ -48,7 +48,10 @@ const buildSchema = (yaml: YamlSkeleton) => {
 };
 
 export class ConfigFile {
-  constructor(public readonly config: YamlSkeleton) {
+  public readonly config: YamlSkeleton;
+
+  constructor(config: YamlSkeleton) {
+    this.config = config;
     if (this.config.rendererConfig === undefined) {
       this.config.rendererConfig = null;
     }

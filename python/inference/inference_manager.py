@@ -18,6 +18,7 @@ from scipy.io import wavfile
 
 from inference.api_models import CreateSongOptions, JobProgressResp, STATUS
 from inference.args import parse_args
+from inference.devices import empty_device_cache
 from inference.utils import find_pth_and_index_files, load_audio
 import librosa
 
@@ -306,8 +307,7 @@ class InferenceManager:
             self.model.clearMemory()
             del self.model
             del audio_opt
-            if torch.cuda.is_available():
-                torch.cuda.empty_cache()
+            empty_device_cache()
             gc.collect()
         except Exception as e:
             if self.status == "stopped":
@@ -339,7 +339,7 @@ class InferenceManager:
             if d["status"] == "finished":
                 self.check_and_update_status("Youtube download complete")
             if d["status"] == "downloading":
-                self.check_and_update_status(f"Downloading youtube audio:{d['_percent_str']}{d['_speed_str']}")
+                self.check_and_update_status(f"正在下载 YouTube 音频：{d['_percent_str']}{d['_speed_str']}")
 
         # Define the options for youtube_dl
         ydl_opts = {
@@ -379,7 +379,7 @@ class InferenceManager:
 
         # Now download the video
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            self.check_and_update_status("Downloading audio from YouTube...")
+            self.check_and_update_status("正在从 YouTube 下载音频...")
             ydl.download([url])
             return True, output_path
 
@@ -470,7 +470,7 @@ class InferenceManager:
                 self.output_filepath = self.vocals_file
                 self.create_preview_tracks()
                 return
-            self.check_and_update_status("Loading model...")
+            self.check_and_update_status("正在加载音色模型...")
             self.load_model()
             self.check_and_update_status("Separating track...")
             self.stem_and_load_input_track()

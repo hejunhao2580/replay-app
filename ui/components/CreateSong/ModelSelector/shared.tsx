@@ -52,7 +52,7 @@ export const ModelDownloadStatusText = ({
   const { data: downloadStatus } = useModelDownloadStatus(model);
 
   if (isDownloaded) {
-    return "Downloaded";
+    return "已下载";
   }
 
   const isDownloading = Boolean(downloadStatus?.progress);
@@ -62,7 +62,7 @@ export const ModelDownloadStatusText = ({
 
   const progress = downloadStatus?.progress;
   if (!progress || !progress?.loaded) {
-    return "Downloading...";
+    return "下载中...";
   }
 
   const fileByteCount = progress?.total || 1;

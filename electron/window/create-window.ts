@@ -6,6 +6,7 @@ import { RESOURCES_PATH } from "../constants.ts";
 import { createIPCHandler } from "electron-trpc/main";
 import { router } from "@replay/api/api.ts";
 import { db } from "../data/database.ts";
+import { getWindowTitle } from "../i18n/language.ts";
 
 const windowWithinBounds = (windowState: WindowState, bounds: Electron.Rectangle) => {
   return (
@@ -35,7 +36,7 @@ export const getDefaultWindowOptions = (isSettings?: boolean): Partial<Electron.
           transparent: true,
         }
       : {}),
-    title: "Replay",
+    title: getWindowTitle(isSettings),
     webPreferences: {
       nodeIntegration: true,
       devTools: true,

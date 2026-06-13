@@ -5,7 +5,7 @@ import type { CustomScheme } from "electron";
 import isDev from "electron-is-dev";
 import { getDeferred, installExtensions, showApp, showErrorAlert } from "./utils/util";
 import registerContextMenu from "electron-context-menu";
-import { getMenu } from "./window/menu";
+import { getMenu, registerLanguageIpc } from "./window/menu";
 
 // todo - do fewer of these imports in this file to improve startup time
 import { mainAppIconDevPng } from "./constants";
@@ -26,6 +26,7 @@ registerContextMenu({
   showCopyLink: true,
   showSaveLinkAs: true,
 });
+registerLanguageIpc();
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.

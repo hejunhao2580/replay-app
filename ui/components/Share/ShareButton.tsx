@@ -12,10 +12,10 @@ function copyToClipboard(text) {
   navigator.clipboard
     .writeText(text)
     .then(() => {
-      toast.info("Copied to clipboard!");
+      toast.info("链接已复制");
     })
     .catch(() => {
-      toast.error("Failed to copy to clipboard");
+      toast.error("复制链接失败");
     });
 }
 
@@ -73,9 +73,9 @@ const ShareButton = ({ songId }: { songId: string }) => {
       await updateShareId({ songId: song.id, shareId });
       await refetch();
       logEvent({ event: "shareSong", metadata: { shareId } });
-      toast.info("Song uploaded successfully");
+      toast.info("作品上传成功");
     } else {
-      toast.error("Failed to upload song");
+      toast.error("作品上传失败");
     }
   };
 
@@ -86,7 +86,7 @@ const ShareButton = ({ songId }: { songId: string }) => {
       sx={{ backgroundColor: "#646464", borderRadius: "12px" }}
       endIcon={isUploading ? <CircularProgress variant="indeterminate" color="inherit" size={20} /> : <Link />}
     >
-      {isUploading ? "Uploading..." : "Share"}
+      {isUploading ? "上传中..." : "分享作品"}
     </Button>
   ) : (
     <Box

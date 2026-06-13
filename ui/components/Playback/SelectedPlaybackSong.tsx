@@ -6,7 +6,7 @@ import { useReplay } from "../../context";
 import { startCase } from "lodash-es";
 import ShareButton from "../Share/ShareButton";
 import { IconButton, Slider, Stack } from "@mui/material";
-import { Edit, VolumeDown, VolumeUp } from "@mui/icons-material";
+import { Edit, MusicNote, VolumeDown, VolumeUp } from "@mui/icons-material";
 import SongEditModal from "./SongEditModal";
 import { trpcReact } from "../../config/trpc";
 import AudioPlayer from "./AudioPlayer.tsx";
@@ -21,16 +21,16 @@ function getDifferenceInMMSS(date1, date2) {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
 
-  const minString = minutes === 0 ? "" : `${minutes.toString().padStart(2, "0")}m `;
-  return `${minString}${seconds.toString().padStart(2, "0")}s`;
+  const minString = minutes === 0 ? "" : `${minutes.toString().padStart(2, "0")}分 `;
+  return `${minString}${seconds.toString().padStart(2, "0")}秒`;
 }
-const formatter = new Intl.DateTimeFormat("en-US", {
-  year: "2-digit",
+const formatter = new Intl.DateTimeFormat("zh-CN", {
+  year: "numeric",
   month: "numeric",
   day: "numeric",
   hour: "numeric",
   minute: "numeric",
-  hour12: true,
+  hour12: false,
 });
 
 const RemixAgainButton = () => {
@@ -61,7 +61,7 @@ const RemixAgainButton = () => {
         setSelectedPlaybackSongId(null);
       }}
     >
-      Remix Again
+      用同样设置再做一版
     </Button>
   );
 };
@@ -100,31 +100,31 @@ export const SelectedPlaybackSong = () => {
   const name = getSongName(selectedPlaybackSong);
 
   const getSubtitle = () => {
-    const texts: string[] = [`Processed in ${getDifferenceInMMSS(date, endDate)}`];
+    const texts: string[] = [`处理耗时 ${getDifferenceInMMSS(date, endDate)}`];
     if (options) {
       if (options.sampleMode) {
-        texts.push(`Sample Mode (30s)`);
+        texts.push(`试听模式（30 秒）`);
       }
       if (options.pitch) {
-        texts.push(`Pitch: ${options.pitch}`);
+        texts.push(`主音高：${options.pitch}`);
       }
       if (options.instrumentalsPitch) {
-        texts.push(`Instrumentals Pitch: ${options.instrumentalsPitch}`);
+        texts.push(`伴奏音高：${options.instrumentalsPitch}`);
       }
       if (options.vocalsOnly) {
-        texts.push(`Vocals Only`);
+        texts.push(`仅处理人声`);
       }
       if (options.preStemmed) {
-        texts.push(`Pre-Stemmed`);
+        texts.push(`已提前分离音轨`);
       }
       if (options.f0Method) {
-        texts.push(`F0 Method: ${options.f0Method}`);
+        texts.push(`音高算法：${options.f0Method}`);
       }
       if (options.indexRatio) {
-        texts.push(`Index Ratio: ${options.indexRatio}`);
+        texts.push(`索引强度：${options.indexRatio}`);
       }
     }
-    return texts.join(" • ");
+    return texts.join(" / ");
   };
   return (
     <Box
@@ -172,7 +172,7 @@ export const SelectedPlaybackSong = () => {
           height: "fit-content",
         }}
       >
-        <Typography variant={"h1"}>Created Track</Typography>
+        <Typography variant={"h1"}>生成作品</Typography>
         {songPath && (
           <>
             <Box sx={{ backgroundColor: "#2c2c2c", p: 2, borderRadius: "16px", mt: 2 }}>
@@ -191,7 +191,7 @@ export const SelectedPlaybackSong = () => {
                     minWidth: 120,
                   }}
                 >
-                  <Typography sx={{ fontSize: 80 }}>💿</Typography>
+                  <MusicNote sx={{ fontSize: 72, color: "#eee" }} />
                 </Box>
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
                   {/* Title */}
@@ -209,7 +209,7 @@ export const SelectedPlaybackSong = () => {
                   <Box sx={{ display: "flex", flexDirection: "row", alignItems: "center", gap: 1 }}>
                     {modelName && (
                       <>
-                        <Typography variant={"body1"}>Remixed as:</Typography>
+                        <Typography variant={"body1"}>转换音色：</Typography>
                         <Box sx={{ backgroundColor: "#646464", px: 1, py: 0.5, borderRadius: "6px" }}>
                           {startCase(modelName)}
                         </Box>
@@ -252,7 +252,7 @@ export const SelectedPlaybackSong = () => {
               <Box sx={{ display: "flex", flexGrow: 1, mt: 3, alignItems: "end" }}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
                   <Typography variant={"body2"} sx={{ color: "#ccc" }}>
-                    Made with
+                    由
                   </Typography>
                   <Typography variant={"body1"} sx={{ fontWeight: 700, fontSize: 24, letterSpacing: "-1px" }}>
                     Replay
@@ -263,7 +263,7 @@ export const SelectedPlaybackSong = () => {
                   <Slider
                     min={0}
                     max={1}
-                    aria-label="Volume"
+                    aria-label="音量"
                     value={volume}
                     step={0.01}
                     onChange={(e, value) => setVolume(value as number)}
@@ -279,7 +279,7 @@ export const SelectedPlaybackSong = () => {
           </>
         )}
         <Box sx={{ mt: 3, mb: 1 }}>
-          <Typography variant={"h1"}>Source Tracks</Typography>
+          <Typography variant={"h1"}>源音轨</Typography>
         </Box>
         <Box
           sx={{

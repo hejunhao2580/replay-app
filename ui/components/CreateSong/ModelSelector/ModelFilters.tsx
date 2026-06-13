@@ -7,6 +7,23 @@ import { startCase } from "lodash-es";
 import * as React from "react";
 import { ModelWrapper } from "./shared.tsx";
 
+const categoryLabels: Record<string, string> = {
+  favorites: "收藏",
+  downloaded: "已下载",
+  validated: "精选",
+  all: "全部",
+  musician: "音乐人",
+  politician: "公众人物",
+  "video game": "游戏角色",
+  "fictional character": "虚构角色",
+  "notable person": "知名人物",
+  anime: "动画角色",
+  entertainment: "娱乐",
+  unknown: "未分类",
+};
+
+const getCategoryLabel = (classification: string) => categoryLabels[classification] || startCase(classification);
+
 export const ModelFilters = () => {
   const setVoiceModelFilters = useReplay((state) => state.setVoiceModelFilters);
   const voiceModelFilters = useReplay((state) => state.voiceModelFilters);
@@ -30,11 +47,11 @@ export const ModelFilters = () => {
           color: "white",
         }}
       >
-        <Typography>Category</Typography>
+        <Typography>分类</Typography>
       </Box>
       {classifications?.map((classification) => {
         const isFav = classification === FAVORITES_CATEGORY;
-        const prefix = isFav ? "⭐️" : "";
+        const prefix = isFav ? "★" : "";
         return (
           <Box
             sx={{
@@ -56,7 +73,7 @@ export const ModelFilters = () => {
               setVoiceModelFilters({ ...voiceModelFilters, classification });
             }}
           >
-            {prefix} {startCase(classification)}
+            {prefix} {getCategoryLabel(classification)}
           </Box>
         );
       })}

@@ -12,11 +12,11 @@ export const Welcome = (props: SharedProps) => {
     <Wrapper>
       <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Typography variant={"h1"}>{"Welcome to "}</Typography>
+          <Typography variant={"h1"}>{"欢迎使用 "}</Typography>
           <Wordmark />
         </Box>
         <Typography variant={"body1"} sx={{ pb: 1 }}>
-          {"Let's get started remixing with AI"}
+          {"开始用 AI 制作自己的翻唱"}
         </Typography>
       </Box>
       <Logo />
@@ -27,7 +27,7 @@ export const Welcome = (props: SharedProps) => {
           variant={"contained"}
           endIcon={<ArrowForward />}
         >
-          Continue
+          继续
         </Button>
       </Box>
     </Wrapper>

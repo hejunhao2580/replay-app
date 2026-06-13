@@ -31,8 +31,8 @@ const ServerProgress = () => {
   const percentCompletedTotal = Math.round((totalBytesDownloaded * 100) / totalSize);
 
   const downloadProgress = totalBytesDownloaded
-    ? `Total: ${formatter(totalBytesDownloaded)} / ${formatter(totalSize)}`
-    : "Downloading...";
+    ? `总进度：${formatter(totalBytesDownloaded)} / ${formatter(totalSize)}`
+    : "下载中...";
 
   const getSuffix = () => {
     if (fileByteCount !== 1 && fileByteCount) {
@@ -51,13 +51,13 @@ const ServerProgress = () => {
       )}
       {fileCount > 0 && (
         <Typography variant={"body1"} sx={{ py: 1, display: "flex", justifyContent: "center" }}>
-          File {currentFileNum} of {fileCount}
+          文件 {currentFileNum} / {fileCount}
           {suffix}
         </Typography>
       )}
       {error && (
         <Typography variant={"body1"} sx={{ py: 1, display: "flex", justifyContent: "center" }}>
-          Error: {`${error}`}
+          出错：{`${error}`}
         </Typography>
       )}
       {percentCompletedTotal > 0 && (
@@ -95,8 +95,8 @@ const Progress = () => {
   const percentCompletedTotal = Math.round((totalBytesDownloaded * 100) / totalSize);
 
   const downloadProgress = totalBytesDownloaded
-    ? `Total: ${formatter(totalBytesDownloaded)} / ${formatter(totalSize)}`
-    : "Downloading...";
+    ? `总进度：${formatter(totalBytesDownloaded)} / ${formatter(totalSize)}`
+    : "下载中...";
 
   const getSuffix = () => {
     if (fileByteCount !== 1 && fileByteCount) {
@@ -108,7 +108,7 @@ const Progress = () => {
   return (
     <Box sx={{ width: 400 }}>
       <Typography variant={"body1"} sx={{ py: 1, display: "flex", justifyContent: "center" }}>
-        File {currentFileNum} of {fileCount}
+        文件 {currentFileNum} / {fileCount}
         {getSuffix()}
       </Typography>
       <LinearProgress variant={"determinate"} value={percentCompletedTotal} />
@@ -124,7 +124,7 @@ const Progress = () => {
 
 export const FetchServerAndModelData = (props: SharedProps) => {
   const { mutateAsync: fetchLocalModel } = trpcReact.fetchLocalModel.useMutation();
-  const { mutateAsync: fetchServer, isLoading } = trpcReact.fetchServer.useMutation();
+  const { mutateAsync: fetchServer } = trpcReact.fetchServer.useMutation();
   const { data: serverStatus } = useFetchingServerStatus();
 
   const { data: hasRequiredFilesFast, refetch: refetchHasRequiredFiles } = useHasRequiredLocalFiles();
@@ -145,16 +145,14 @@ export const FetchServerAndModelData = (props: SharedProps) => {
 
   return (
     <Wrapper>
-      <Typography variant={"h1"}>{hasCompletedOnboarding ? "AI Server Update" : "AI Data Download"}</Typography>
+      <Typography variant={"h1"}>{hasCompletedOnboarding ? "AI 服务更新" : "下载 AI 数据"}</Typography>
       {hasCompletedOnboarding && (
         <Typography variant={"body1"} sx={{ pb: 1, textAlign: "center" }}>
-          There is an update to the server. If you do not wish to receive these updates, you can open up Settings and
-          use the pinned version.
+          检测到服务端有更新。如果暂时不想更新，可以在设置里固定当前服务端版本。
         </Typography>
       )}
       <Typography variant={"body1"} sx={{ pb: 1, textAlign: "center" }}>
-        Replay needs to download an AI model to generate music. Depending on your internet connection, this might take a
-        while.
+        Replay 需要下载基础模型和推理服务后才能生成音频。文件较大，下载时间取决于你的网络情况。
       </Typography>
       <ServerProgress />
       <Progress />
@@ -166,7 +164,7 @@ export const FetchServerAndModelData = (props: SharedProps) => {
           sx={{ borderRadius: 2 }}
           endIcon={<Download />}
         >
-          {hasRequiredFiles ? "Re-download" : "Download"}
+          {hasRequiredFiles ? "重新下载" : "开始下载"}
         </Button>
         <Button
           sx={{ mx: 2, borderRadius: 2 }}
@@ -175,7 +173,7 @@ export const FetchServerAndModelData = (props: SharedProps) => {
           variant={"contained"}
           endIcon={<ArrowForward />}
         >
-          Continue
+          继续
         </Button>
       </Box>
     </Wrapper>

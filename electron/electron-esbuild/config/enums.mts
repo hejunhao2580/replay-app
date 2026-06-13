@@ -4,12 +4,16 @@
  * All rights reserved.
  */
 
-export enum TypeConfig {
-  esbuild = "esbuild",
-  vite = "vite",
-}
+export const TypeConfig = {
+  esbuild: "esbuild",
+  vite: "vite",
+} as const;
 
-export enum Target {
-  main,
-  renderer,
-}
+export type TypeConfig = (typeof TypeConfig)[keyof typeof TypeConfig];
+
+export const Target = {
+  main: 0,
+  renderer: 1,
+} as const;
+
+export type Target = (typeof Target)[keyof typeof Target];

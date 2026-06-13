@@ -26,6 +26,18 @@
         }
       }
     },
+    "/device_details": {
+      "get": {
+        "summary": "Device Details",
+        "operationId": "deviceDetails",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DeviceDetailsResp" } } }
+          }
+        }
+      }
+    },
     "/set_device": {
       "post": {
         "summary": "Set Device",
@@ -358,6 +370,31 @@
         "required": ["devices"],
         "title": "DeviceOptionsResp"
       },
+      "DeviceInfoResp": {
+        "properties": {
+          "id": { "type": "string", "enum": ["cpu", "xpu", "mps"], "title": "Id" },
+          "label": { "type": "string", "title": "Label" },
+          "backend": { "type": "string", "title": "Backend" },
+          "model": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Model" },
+          "torch_device": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Torch Device" },
+          "ort_provider": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Ort Provider" }
+        },
+        "type": "object",
+        "required": ["id", "label", "backend"],
+        "title": "DeviceInfoResp"
+      },
+      "DeviceDetailsResp": {
+        "properties": {
+          "activeDevice": { "type": "string", "enum": ["cpu", "xpu", "mps"], "title": "Activedevice" },
+          "activeLabel": { "type": "string", "title": "Activelabel" },
+          "intelGpuModel": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Intelgpumodel" },
+          "ortProviders": { "items": { "type": "string" }, "type": "array", "title": "Ortproviders" },
+          "devices": { "items": { "$ref": "#/components/schemas/DeviceInfoResp" }, "type": "array", "title": "Devices" }
+        },
+        "type": "object",
+        "required": ["activeDevice", "activeLabel", "ortProviders", "devices"],
+        "title": "DeviceDetailsResp"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": { "items": { "$ref": "#/components/schemas/ValidationError" }, "type": "array", "title": "Detail" }
@@ -472,7 +509,11 @@
         "title": "StopJobReq"
       },
       "TorchDevice": {
-        "properties": { "device": { "type": "string", "enum": ["cpu", "cuda", "xla", "mps"], "title": "Device" } },
+        "properties": {
+          "device": { "type": "string", "enum": ["cpu", "xpu", "mps"], "title": "Device" },
+          "label": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Label" },
+          "model": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Model" }
+        },
         "type": "object",
         "required": ["device"],
         "title": "TorchDevice"
